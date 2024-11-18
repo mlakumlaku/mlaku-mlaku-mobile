@@ -7,8 +7,8 @@
 
 ## Tentang Proyek
 - Nama Web: MlakuMlaku
-- Repositori GitHub: https://github.com/Chromss/mlaku-mlaku
-- Deployment Web: https://pbp.cs.ui.ac.id/nabil.zahid/mlakumlaku
+- Repositori GitHub: https://github.com/malikaatha/mlaku-mlaku-mobile.git
+- Deployment Web: 
 *Tentatif, bisa berubah ke web hosting/domain lain, jika ada perubahan terkait ini, README akan diubah secepatnya.
 
 ## Deskripsi Proyek
@@ -56,20 +56,20 @@ Setelah memilih lokasi, pengguna dapat melihat deskripsi singkat mengenai lokasi
 3. Notifikasi Pembelian: Setelah melakukan pembelian, pengguna akan menerima notifikasi konfirmasi serta informasi pengiriman produk.
 
 ### C. Itinerary
-1. Template Management: Menyediakan berbagai template itinerary yang dapat disesuaikan oleh pengguna.
-2. Destination Editing: Menambah, menghapus, atau mengubah destinasi dalam template itinerary yang dipilih jika user merasa kurang puas dengan template.
-3. Itinerary Sharing: Mengizinkan user untuk membagikan tautan  itinerary yang telah dibuat dengan user lain.
+1. Template Management: Menyediakan template itinerary yang dapat disesuaikan oleh pengguna.
+2. Destination Editing: Menambah, menghapus, atau mengubah itinerary yang telah dibuat oleh pengguna.
+3. Itinerary Sharing: Mengizinkan pengguna untuk membagikan itinerary yang telah dibuat.
 
 ### D. Collections
-1. Bookmark Management: Mengizinkan user menyimpan destinasi favorit mereka ke dalam sebuah koleksi di akun mereka.
-2. Playlist Creation: Untuk membuat, mengedit, dan menghapus playlist berdasarkan tema atau rencana perjalanan yang sesuai dengan preferensi user.
-3. Playlist Privacy: Mengatur playlist sebagai public atau private, sesuai keinginan user.
-4. Playlist Sharing: Memungkinkan user untuk membagikan playlist mereka dengan orang lain.
+1. Bookmark Management: Mengizinkan pengguna menyimpan destinasi favorit mereka ke dalam sebuah koleksi di akun mereka.
+2. Collection Creation: Untuk membuat, mengedit, dan menghapus collection berdasarkan tema atau rencana perjalanan yang sesuai dengan preferensi user.
+3. Collection Sorting: Berdasarkan A - Z atau Z - A.
+4. Collection Sharing: Memungkinkan pengguna untuk membagikan collection mereka dengan orang lain.
 
 ### E. #JurnalJogjaku
-1. Journal Posting: Mengizinkan pengguna menulis cerita, tips, dan pengalaman mereka dalam format thread (seperti Twitter).
-2. Comment: Pengguna lain dapat meninggalkan komentar pada cerita yang diposting.
-3. Journal Search: Untuk mencari cerita berdasarkan hashtag atau kata kunci tertentu.
+1. Journal Posting: Mengizinkan pengguna menulis cerita, tips, dan pengalaman mereka.
+2. Fitur Like postingan jurnal
+3. Filter sortir souvenir
 
 ## Role dan Peran Pengguna
 ### A. Customer
