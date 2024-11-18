@@ -37,12 +37,12 @@ Pengguna dapat memberikan ulasan dan rating untuk setiap destinasi wisata, serta
 
 ## Daftar Modul
 
-### A. Modul Admin: Manajemen Produk
+### A. Modul Admin: Manajemen Produk (Nabil Zahid Rahman)
 1. Menambahkan Produk: Setelah memilih lokasi, admin dapat menambahkan produk-produk yang dijual di lokasi tersebut.
 2. Mengedit Produk: Admin dapat mengubah detail produk, seperti nama, deskripsi, harga, dan gambar.
 3. Menghapus Produk: Admin dapat menghapus produk yang tidak lagi tersedia atau ingin dihentikan penjualannya di lokasi tersebut.
 
-### B. Places
+### B. Places (Patricia Gloria Sujatmoko Silaban)
 Setelah memilih lokasi, pengguna dapat melihat deskripsi singkat mengenai lokasi tersebut serta daftar produk yang dijual di lokasi tersebut.
 
 **Ulasan dan Komentar**
@@ -55,18 +55,18 @@ Setelah memilih lokasi, pengguna dapat melihat deskripsi singkat mengenai lokasi
 2. Pembayaran: Aplikasi menyediakan berbagai metode pembayaran yang aman dan mudah digunakan untuk menyelesaikan transaksi pembelian.
 3. Notifikasi Pembelian: Setelah melakukan pembelian, pengguna akan menerima notifikasi konfirmasi serta informasi pengiriman produk.
 
-### C. Itinerary
+### C. Itinerary (Alica Kinar Deska)
 1. Template Management: Menyediakan template itinerary yang dapat disesuaikan oleh pengguna.
 2. Destination Editing: Menambah, menghapus, atau mengubah itinerary yang telah dibuat oleh pengguna.
 3. Itinerary Sharing: Mengizinkan pengguna untuk membagikan itinerary yang telah dibuat.
 
-### D. Collections
+### D. Collections (Malika Atha Indurasmi)
 1. Bookmark Management: Mengizinkan pengguna menyimpan destinasi favorit mereka ke dalam sebuah koleksi di akun mereka.
 2. Collection Creation: Untuk membuat, mengedit, dan menghapus collection berdasarkan tema atau rencana perjalanan yang sesuai dengan preferensi user.
 3. Collection Sorting: Berdasarkan A - Z atau Z - A.
 4. Collection Sharing: Memungkinkan pengguna untuk membagikan collection mereka dengan orang lain.
 
-### E. #JurnalJogjaku
+### E. #JurnalJogjaku (Nur Khoirunnisa Salsabila)
 1. Journal Posting: Mengizinkan pengguna menulis cerita, tips, dan pengalaman mereka.
 2. Fitur Like postingan jurnal
 3. Filter sortir souvenir
