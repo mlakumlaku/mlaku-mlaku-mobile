@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mlaku_mlaku/widgets/bottom_navbar.dart'; // Ganti dengan path yang sesuai
+import 'package:mlaku_mlaku/journal/screens/journal_entry_form.dart'; // Tambahkan import ini
 
 class JournalHome extends StatefulWidget {
   @override
@@ -41,18 +42,26 @@ class _JournalHomeState extends State<JournalHome> {
                   ),
                 ),
               ),
-              TextButton(onPressed: () {}, child: Text('Publish')),
+              TextButton(
+                onPressed: () {
+                  // Navigasi ke halaman JournalEntryFormPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => JournalEntryFormPage()),
+                  );
+                },
+                child: Text('Publish'),
+              ),
             ],
           ),
           // Daftar jurnal
           Expanded(
             child: ListView.builder(
-              itemCount: 5, // Ganti dengan jumlah jurnal yang sesuai
+              itemCount: 0, // Ganti dengan jumlah jurnal yang sesuai
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('What I Learned Hiking to Mount Merapi—An Experience Like No...'),
-                  subtitle: Text('by kinardes'),
-                  leading: Image.network('URL_GAMBAR'), // Ganti dengan URL gambar yang sesuai
+                  title: Text('Judul Jurnal'), // Ganti dengan judul jurnal yang sesuai
+                  subtitle: Text('by penulis'), // Ganti dengan nama penulis
                 );
               },
             ),
