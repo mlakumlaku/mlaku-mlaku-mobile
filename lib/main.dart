@@ -1,7 +1,11 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:mlaku_mlaku/screens/login.dart';
+import 'widgets/bottom_navbar.dart';
+import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
 
 
 void main() {
@@ -21,10 +25,15 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Mlaku-Mlaku',
         theme: ThemeData(
-          useMaterial3: true,
+          primaryColor: Colors.blueAccent, // Warna utama
           colorScheme: ColorScheme.fromSwatch(
-            primarySwatch: Colors.deepPurple,
-          ).copyWith(secondary: Colors.deepPurple[400]),
+            primarySwatch: Colors.blue,
+          ).copyWith(secondary: Colors.redAccent), // Menambahkan warna aksen
+          scaffoldBackgroundColor: Colors.white, // Latar belakang putih
+          textTheme: TextTheme(
+            bodyLarge: const TextStyle(color: Colors.black), // Teks hitam
+            bodyMedium: const TextStyle(color: Colors.black54), // Teks abu-abu
+          ),
         ),
         home: const LoginPage(),
       ),
@@ -35,15 +44,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -51,71 +51,150 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: const Color(0xFF282A3A), // Ubah warna latar belakang di sini
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+        backgroundColor: const Color(0xFF282A3A), // Warna latar belakang AppBar
+        title: Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Mlaku-Mlaku',
+                textAlign: TextAlign.center, // Menjaga teks di tengah
+                style: TextStyle(
+                  color: Colors.white, // Warna teks putih
+                  fontSize: 28, // Ganti dengan ukuran font yang diinginkan
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.person, color: Colors.white), // Ikon pengguna
+                  const SizedBox(width: 4),
+                  const Text(
+                    'tesbaru', // Ganti dengan nama pengguna yang sesuai
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white), // Ikon logout
+              onPressed: () {
+                // Navigasi kembali ke halaman login
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: const Text(
+                'Touring Across Yogyakarta',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: const Text(
+                'Start your next unforgettable trip with MlakuMaku!',
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Colors.redAccent,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'A Hub for Local Excellence',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Warna hitam
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Yogyakarta, where ancient heritage and vibrant culture intertwine, offers a captivating journey through Indonesia’s heart. Explore the majestic Borobudur and Prambanan temples, both UNESCO World Heritage Sites, that stand as timeless symbols of history. From traditional Javanese art to modern creativity, Yogyakarta is a melting pot of inspiration and innovation. Experience the warmth of its people and the rich flavors of its cuisine, making every visit unforgettable.',
+              style: TextStyle(fontSize: 14, color: Colors.white54),
+            ),
+            const SizedBox(height: 16),
+            // Tambahkan konten lain di sini jika diperlukan
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                children: [
+                  _buildCard('Bukit Lintang Sewu', 'assets/bukit_lintang_sewu.jpg'),
+                  _buildCard('Bunker Kaliadem Merapi', 'assets/bunker_kaliadem.jpg'),
+                  _buildCard('De Mata Museum Jogja', 'assets/de_mata_museum.jpg'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      
+      bottomNavigationBar: BottomNavBar(
+        onTap: (index) {
+          // Handle navigation based on the index
+          if (index == 0) {
+            // Navigate to Home
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (index == 1) {
+            // Navigate to Journals
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
+            );
+          } else {
+            // Show snackbar for other items
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Page belum tersedia')),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildCard(String title, String imagePath) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          Expanded(
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
