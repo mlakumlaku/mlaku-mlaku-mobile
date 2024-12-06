@@ -1,7 +1,10 @@
+// ```dart:lib/journal/screens/journal_entry_form.dart
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:mlaku_mlaku/models/journal_entry.dart'; // Import model
-import 'dart:convert'; // Untuk mengurai JSON
+// import 'package:image_picker/image_picker.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class JournalEntryFormPage extends StatefulWidget {
   const JournalEntryFormPage({super.key});
@@ -14,218 +17,165 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   final _formKey = GlobalKey<FormState>();
   String _title = "";
   String _content = "";
-  String? _selectedPlace;
-  String? _selectedSouvenir;
-  String _image = ""; // Store image path if needed
-  List<dynamic> _places = [];
-  List<dynamic> _souvenirs = [];
-  List<dynamic> _filteredSouvenirs = []; // Souvenirs filtered by selected place
+  String _placeName = "";
+  String? _souvenirId; // Optional souvenir ID
+  List<dynamic> _souvenirs = []; // List to hold souvenirs
+  List<dynamic> _places = []; // List to hold places
+  File? _image; // Variable to hold the selected image
 
   @override
   void initState() {
     super.initState();
-    _loadData(); // Panggil fungsi untuk memuat data
+    _fetchPlaces(); // Fetch places when the form is initialized
   }
 
-  Future<void> _loadData() async {
-    final String response = await rootBundle.loadString('assets/DATASET.json');
-    final data = await json.decode(response);
+  Future<void> _fetchPlaces() async {
+    final request = context.read<CookieRequest>();
+    final response = await request.get('http://127.0.0.1:8000/get-places/');
+    print(response); // Check if places are fetched correctly
     setState(() {
-      _places = data; // Simpan data tempat
-      _souvenirs = data; // Simpan data souvenir
-      _filteredSouvenirs = data; // Awalnya, semua souvenirs
+      _places = response;
     });
   }
 
-  void _filterSouvenirs(String? selectedPlace) {
-    if (selectedPlace == null) {
-      setState(() {
-        _filteredSouvenirs = _souvenirs; // Reset to all souvenirs if no place is selected
-      });
-      return;
-    }
-
+  Future<void> _fetchSouvenirs(String placeName) async {
+    final request = context.read<CookieRequest>();
+    final response = await request.get('http://127.0.0.1:8000/get-souvenirs/?place_name=$placeName');
+    print(response); // Check if souvenirs are fetched correctly
     setState(() {
-      _filteredSouvenirs = _souvenirs.where((souvenir) {
-        return souvenir['Place Name'] == selectedPlace; // Filter souvenirs by selected place
-      }).toList();
+      _souvenirs = response;
+      _souvenirId = null; // Reset souvenir selection
     });
   }
+
+  // Future<void> _pickImage() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+  //   }
+  // }
+
+  
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Create a New Journal',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: const Text('Create Journal Entry'),
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Title",
-                    labelText: "Title",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Title'),
+                  onChanged: (value) {
                     setState(() {
-                      _title = value!;
+                      _title = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Title cannot be empty!";
+                      return 'Please enter a title';
                     }
                     return null;
                   },
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: "Content",
-                    labelText: "Content",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Content'),
+                  onChanged: (value) {
                     setState(() {
-                      _content = value!;
+                      _content = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Content cannot be empty!";
+                      return 'Please enter content';
                     }
                     return null;
                   },
                 ),
-              ),
-              DropdownButton<String>(
-                value: _selectedPlace,
-                hint: Text('-- Select Place --'),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedPlace = newValue;
-                    _filterSouvenirs(newValue); // Filter souvenirs based on selected place
-                  });
-                },
-                items: _places.map<DropdownMenuItem<String>>((dynamic place) {
-                  return DropdownMenuItem<String>(
-                    value: place['Place Name'],
-                    child: Text(place['Place Name']),
-                  );
-                }).toList(),
-              ),
-              DropdownButton<String>(
-                value: _selectedSouvenir,
-                hint: Text('-- Select Souvenir --'),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedSouvenir = newValue;
-                  });
-                },
-                items: _filteredSouvenirs.map<DropdownMenuItem<String>>((dynamic souvenir) {
-                  return DropdownMenuItem<String>(
-                    value: souvenir['Product Name'],
-                    child: Text(souvenir['Product Name']),
-                  );
-                }).toList(),
-              ),
-              // Widget untuk memilih gambar
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Select Place'),
+                  items: _places.map((place) {
+                    return DropdownMenuItem<String>(
+                      value: place['name'], // Ensure this matches your data structure
+                      child: Text(place['name']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _placeName = value!;
+                      _fetchSouvenirs(_placeName); // Fetch souvenirs for the selected place
+                    });
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Select Souvenir'),
+                  value: _souvenirId,
+                  items: _souvenirs.map((souvenir) {
+                    return DropdownMenuItem<String>(
+                      value: int.parse(souvenir['id']).toString(),
+                      child: Text(souvenir['name']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _souvenirId = value;
+                    });
+                  },
+                ),
+                // Image Picker
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Text(_image == null ? 'No image selected' : 'Image selected'),
+                //     TextButton(
+                //       onPressed: _pickImage,
+                //       child: const Text('Pick Image'),
+                //     ),
+                //   ],
+                // ),
+                ElevatedButton(
                   onPressed: () async {
-                    // Logika untuk memilih gambar
-                    // Anda bisa menggunakan image_picker package
-                  },
-                  child: Text('Select Image'),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          Theme.of(context).colorScheme.primary),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Simpan data ke model
-                        final newEntry = Welcome(
-                          model: 'journal_entry',
-                          pk: 0, // Atur sesuai kebutuhan
-                          fields: Fields(
-                            author: 1, // Ganti dengan ID penulis yang sesuai
-                            title: _title,
-                            content: _content,
-                            createdAt: DateTime.now(),
-                            updatedAt: DateTime.now(),
-                            image: _image,
-                            souvenir: _selectedSouvenir != null ? int.parse(_selectedSouvenir!) : null,
-                            placeName: _selectedPlace,
-                            likes: [],
-                          ),
-                        );
+                    if (_formKey.currentState!.validate()) {
+                      final request = context.read<CookieRequest>();
+                      final response = await request.postJson(
+                        "http://127.0.0.1:8000/create-journal-flutter/",
+                        jsonEncode({
+                          'title': _title,
+                          'content': _content,
+                          'place_name': _placeName,
+                          'souvenir': _souvenirId, // Optional
+                          // Include image if needed
+                        }),
+                      );
 
-                        // Tampilkan dialog konfirmasi
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Journal Entry Saved'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Title: $_title'),
-                                    Text('Content: $_content'),
-                                    Text('Place: $_selectedPlace'),
-                                    Text('Souvenir: $_selectedSouvenir'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                      if (response['success']) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Journal entry created!")),
+                        );
+                        Navigator.pop(context); // Go back to the previous screen
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Error creating journal entry.")),
                         );
                       }
-                    },
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                    }
+                  },
+                  child: const Text("Submit"),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

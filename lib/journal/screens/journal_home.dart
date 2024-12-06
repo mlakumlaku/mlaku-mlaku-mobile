@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mlaku_mlaku/widgets/bottom_navbar.dart'; // Ganti dengan path yang sesuai
-import 'package:mlaku_mlaku/journal/screens/journal_entry_form.dart'; // Tambahkan import ini
+import 'package:mlaku_mlaku/widgets/bottom_navbar.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:mlaku_mlaku/journal/screens/journal_entry_form.dart';
+import 'dart:convert';
+import 'package:provider/provider.dart'; // This is necessary for using context.read
 
 class JournalHome extends StatefulWidget {
   @override
@@ -8,43 +11,54 @@ class JournalHome extends StatefulWidget {
 }
 
 class _JournalHomeState extends State<JournalHome> {
-  bool _isHovered = false;
+  List<dynamic> _journals = [];
+  int _selectedIndex = 0; // Track the selected tab
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJournals(); // Fetch journals when the widget is initialized
+  }
+
+  Future<void> _fetchJournals() async {
+    final request = context.read<CookieRequest>();
+    final response = await request.get('http://127.0.0.1:8000/json/');
+    setState(() {
+      _journals = response; // Assuming response is a list of journals
+    });
+  }
+
+  void _onTabSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('MlakuMlaku'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.account_circle),
-            onPressed: () {
-              // Aksi untuk ikon akun
-            },
-          ),
-        ],
+        title: Text('Journals'),
       ),
       body: Column(
         children: [
-          // Bagian untuk tombol "For You", "My Journal", dan "Publish"
+          // Button Row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TextButton(onPressed: () {}, child: Text('For You')),
-              MouseRegion(
-                onEnter: (_) => setState(() => _isHovered = true),
-                onExit: (_) => setState(() => _isHovered = false),
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'My Journal',
-                    style: TextStyle(color: _isHovered ? Colors.red : null),
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: () => _onTabSelected(0),
+                child: Text('For You'),
               ),
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
-                  // Navigasi ke halaman JournalEntryFormPage
+                  // Navigate to My Journal History
+                  // Implement your logic here
+                },
+                child: Text('My Journal'),
+              ),
+              ElevatedButton(
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => JournalEntryFormPage()),
@@ -54,14 +68,18 @@ class _JournalHomeState extends State<JournalHome> {
               ),
             ],
           ),
-          // Daftar jurnal
+          // Display Journals
           Expanded(
             child: ListView.builder(
-              itemCount: 0, // Ganti dengan jumlah jurnal yang sesuai
+              itemCount: _journals.length,
               itemBuilder: (context, index) {
+                final journal = _journals[index];
                 return ListTile(
-                  title: Text('Judul Jurnal'), // Ganti dengan judul jurnal yang sesuai
-                  subtitle: Text('by penulis'), // Ganti dengan nama penulis
+                  title: Text(journal['fields']['title']),
+                  subtitle: Text(journal['fields']['content']),
+                  onTap: () {
+                    // Navigate to journal detail page if needed
+                  },
                 );
               },
             ),
