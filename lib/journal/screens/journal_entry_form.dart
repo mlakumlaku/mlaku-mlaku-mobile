@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class JournalEntryFormPage extends StatefulWidget {
   const JournalEntryFormPage({super.key});
@@ -26,16 +27,18 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   @override
   void initState() {
     super.initState();
-    _fetchPlaces(); // Fetch places when the form is initialized
+    _fetchPlaces(); // Ensure this method is defined
   }
 
-  Future<void> _fetchPlaces() async {
-    final request = context.read<CookieRequest>();
-    final response = await request.get('http://127.0.0.1:8000/get-places/');
-    print(response); // Check if places are fetched correctly
-    setState(() {
-      _places = response;
-    });
+  Future<List<String>> _fetchPlaces() async {
+    final response = await http.get(Uri.parse("http://127.0.0.1:8000/get-places/"));
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return List<String>.from(jsonResponse['places']);
+    } else {
+      throw Exception('Failed to load places');
+    }
   }
 
   Future<void> _fetchSouvenirs(String placeName) async {
