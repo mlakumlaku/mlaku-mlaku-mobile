@@ -24,7 +24,17 @@ class _BottomNavBarState extends State<BottomNavBar> {
       _selectedIndex = index;
     });
 
-    if (index == 3) {
+    if (index == 0) {
+      // Navigate to Home
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } else if (index == 2) {
+      // Navigate to Journals
+      // Ganti dengan halaman yang sesuai
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
+      );
+    } else if (index == 3) {
       final request = context.read<CookieRequest>();
       Navigator.push(
         context,
