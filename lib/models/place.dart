@@ -28,4 +28,16 @@ class Place {
       price: (json['Price'] as num).toDouble(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Place Name': placeName,
+      'Description Place': descriptionPlace,
+      'City': city,
+      'Product Name': productName,
+      'Description Product': descriptionProduct,
+      'Business Name': businessName,
+      'Price': price,
+    };
+  }
 } 
