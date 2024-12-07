@@ -1,8 +1,7 @@
-// ```dart:lib/journal/screens/journal_entry_form.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -27,17 +26,36 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   @override
   void initState() {
     super.initState();
-    _fetchPlaces(); // Ensure this method is defined
+    _loadPlaces(); // Ensure this method is defined
   }
 
-  Future<List<String>> _fetchPlaces() async {
-    final response = await http.get(Uri.parse("http://127.0.0.1:8000/get-places/"));
+  Future<void> _loadPlaces() async {
+    try {
+      final places = await _fetchPlaces();
+      setState(() {
+        _places = places;
+      });
+      print('Loaded places: $_places'); // Print the loaded places
+    } catch (e) {
+      print('Error loading places: $e'); // Debug print statement
+    }
+  }
 
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      return List<String>.from(jsonResponse['places']);
-    } else {
-      throw Exception('Failed to load places');
+  Future<List<dynamic>> _fetchPlaces() async {
+    try {
+      final request = context.read<CookieRequest>();
+      final response = await request.get("http://127.0.0.1:8000/get-places/");
+      print('Raw response: $response');
+      
+      if (response != null) {
+        final places = response['places'];
+        print('Fetched places: $places');
+        return places ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Exception during fetch: $e');
+      return [];
     }
   }
 
@@ -46,20 +64,20 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
     final response = await request.get('http://127.0.0.1:8000/get-souvenirs/?place_name=$placeName');
     print(response); // Check if souvenirs are fetched correctly
     setState(() {
-      _souvenirs = response;
+      _souvenirs = response['souvenirs'] ?? []; // Access the 'souvenirs' key from response
       _souvenirId = null; // Reset souvenir selection
     });
   }
 
-  // Future<void> _pickImage() async {
-  //   final picker = ImagePicker();
-  //   final pickedFile = await picker.getImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _image = File(pickedFile.path);
-  //     });
-  //   }
-  // }
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
 
   
 
@@ -110,15 +128,16 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Select Place'),
                   items: _places.map((place) {
+                    // Assuming place is already a string from the backend
                     return DropdownMenuItem<String>(
-                      value: place['name'], // Ensure this matches your data structure
-                      child: Text(place['name']),
+                      value: place, // Use place directly since it's a string
+                      child: Text(place),
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
                       _placeName = value!;
-                      _fetchSouvenirs(_placeName); // Fetch souvenirs for the selected place
+                      _fetchSouvenirs(_placeName);
                     });
                   },
                 ),
@@ -127,7 +146,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                   value: _souvenirId,
                   items: _souvenirs.map((souvenir) {
                     return DropdownMenuItem<String>(
-                      value: int.parse(souvenir['id']).toString(),
+                      value: souvenir['id'].toString(), // Convert id to string
                       child: Text(souvenir['name']),
                     );
                   }).toList(),
@@ -137,17 +156,17 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                     });
                   },
                 ),
-                // Image Picker
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: [
-                //     Text(_image == null ? 'No image selected' : 'Image selected'),
-                //     TextButton(
-                //       onPressed: _pickImage,
-                //       child: const Text('Pick Image'),
-                //     ),
-                //   ],
-                // ),
+                Image Picker
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(_image == null ? 'No image selected' : 'Image selected'),
+                    TextButton(
+                      onPressed: _pickImage,
+                      child: const Text('Pick Image'),
+                    ),
+                  ],
+                ),
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
