@@ -73,13 +73,32 @@ class _JournalHomeState extends State<JournalHome> {
   }
 
   String _getFullImageUrl(String imagePath) {
-    if (imagePath.isEmpty) return '';
-    if (imagePath.startsWith('http')) return imagePath;
-    // Ensure there's a leading slash
-    if (!imagePath.startsWith('/')) {
-      imagePath = '/' + imagePath;
+    // Handle empty path
+    if (imagePath == null || imagePath.isEmpty) {
+      print('Warning: Empty image path provided');
+      return ''; // Or return a default image URL
     }
-    return 'http://127.0.0.1:8000$imagePath';
+  
+    // Already a full URL
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+  
+    // Clean up path
+    String cleanPath = imagePath.trim();
+    
+    // Remove leading slash if exists
+    if (cleanPath.startsWith('/')) {
+      cleanPath = cleanPath.substring(1);
+    }
+  
+    // Construct full URL with media path
+    try {
+      return 'http://127.0.0.1:8000/media/$cleanPath';
+    } catch (e) {
+      print('Error constructing image URL: $e');
+      return ''; // Or return default image URL
+    }
   }
 
   Widget _buildJournalCard(JournalEntry journal) {
@@ -93,7 +112,15 @@ class _JournalHomeState extends State<JournalHome> {
         children: [
           ListTile(
             leading: CircleAvatar(
-              child: Icon(Icons.person),
+              child: fields.image != null && fields.image.isNotEmpty
+                ? Image.network(
+                    _getFullImageUrl(fields.image),
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
+                      return Icon(Icons.person); // Fallback icon
+                    },
+                  )
+                : Icon(Icons.person), // Default icon
             ),
             title: Text(fields.authorUsername),
             subtitle: Text(formattedDate),
@@ -137,27 +164,35 @@ class _JournalHomeState extends State<JournalHome> {
 
           // Update the image section
           if (fields.image.isNotEmpty)
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8.0),
-              height: 200,
-              width: double.infinity,
-              child: Image.network(
-                _getFullImageUrl(fields.image),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  print('Error loading image: $error'); // Add debug print
-                  print('Image path: ${fields.image}'); // Debug print the image path
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.error),
-                        Text('Failed to load image'),
-                        Text(_getFullImageUrl(fields.image)), // Show the full URL for debugging
-                      ],
-                    ),
-                  );
-                },
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8.0),
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% of screen height
+                ),
+                width: double.infinity,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9, // Default aspect ratio if needed
+                  child: Image.network(
+                    _getFullImageUrl(fields.image),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
+                      print('Image path: ${fields.image}');
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.error),
+                            Text('Failed to load image'),
+                            Text(_getFullImageUrl(fields.image)),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
 
