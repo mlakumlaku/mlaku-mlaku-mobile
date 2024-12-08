@@ -1,28 +1,26 @@
-// To parse this JSON data, do
-//
-//     final welcome = welcomeFromJson(jsonString);
-
 import 'dart:convert';
 
-List<Welcome> welcomeFromJson(String str) => List<Welcome>.from(json.decode(str).map((x) => Welcome.fromJson(x)));
+List<JournalEntry> journalEntryFromJson(String str) => 
+    List<JournalEntry>.from(json.decode(str).map((x) => JournalEntry.fromJson(x)));
 
-String welcomeToJson(List<Welcome> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String journalEntryToJson(List<JournalEntry> data) => 
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class Welcome {
+class JournalEntry {
     String model;
     int pk;
-    Fields fields;
+    JournalFields fields;
 
-    Welcome({
+    JournalEntry({
         required this.model,
         required this.pk,
         required this.fields,
     });
 
-    factory Welcome.fromJson(Map<String, dynamic> json) => Welcome(
+    factory JournalEntry.fromJson(Map<String, dynamic> json) => JournalEntry(
         model: json["model"],
         pk: json["pk"],
-        fields: Fields.fromJson(json["fields"]),
+        fields: JournalFields.fromJson(json["fields"]),
     );
 
     Map<String, dynamic> toJson() => {
@@ -32,8 +30,9 @@ class Welcome {
     };
 }
 
-class Fields {
+class JournalFields {
     int author;
+    String authorUsername; // Add author username
     String title;
     String content;
     DateTime createdAt;
@@ -42,39 +41,46 @@ class Fields {
     int? souvenir;
     String? placeName;
     List<int> likes;
+    String? souvenirName; // Add this field
 
-    Fields({
+    JournalFields({
         required this.author,
+        required this.authorUsername,
         required this.title,
         required this.content,
         required this.createdAt,
         required this.updatedAt,
         required this.image,
-        required this.souvenir,
-        required this.placeName,
+        this.souvenir,
+        this.placeName,
         required this.likes,
+        this.souvenirName,
     });
 
-    factory Fields.fromJson(Map<String, dynamic> json) => Fields(
+    factory JournalFields.fromJson(Map<String, dynamic> json) => JournalFields(
         author: json["author"],
+        authorUsername: json["username"] ?? "Anonymous", // Change from author_username to username
         title: json["title"],
         content: json["content"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
-        image: json["image"],
+        image: json["image"] ?? "",
         souvenir: json["souvenir"],
+        souvenirName: json["souvenir_name"], // Add this line
         placeName: json["place_name"],
-        likes: List<int>.from(json["likes"].map((x) => x)),
+        likes: List<int>.from(json["likes"] ?? []),
     );
 
     Map<String, dynamic> toJson() => {
         "author": author,
+        "username": authorUsername, // Update this line as well
         "title": title,
         "content": content,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
         "image": image,
         "souvenir": souvenir,
+        "souvenir_name": souvenirName,
         "place_name": placeName,
         "likes": List<dynamic>.from(likes.map((x) => x)),
     };

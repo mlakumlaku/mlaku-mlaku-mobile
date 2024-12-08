@@ -30,8 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^0.8.5+3
+  # image_picker: ^1.0.4
+  image_picker: ^0.8.4+4
   http: ^1.2.2
+  intl: ^0.18.1  # or whatever is the latest version
   # http: ^0.13.3
   # image_picker: ^latest_version
 

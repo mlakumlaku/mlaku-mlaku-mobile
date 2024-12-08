@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class JournalEntryFormPage extends StatefulWidget {
   const JournalEntryFormPage({super.key});
@@ -21,12 +20,12 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   String? _souvenirId; // Optional souvenir ID
   List<dynamic> _souvenirs = []; // List to hold souvenirs
   List<dynamic> _places = []; // List to hold places
-  File? _image; // Variable to hold the selected image
+  Uint8List? _imageBytes; // Replace File? _image with this
+  String? _selectedSouvenirName; // Add this field
 
   @override
   void initState() {
     super.initState();
-    _loadPlaces(); // Ensure this method is defined
   }
 
   Future<void> _loadPlaces() async {
@@ -71,15 +70,14 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _image = File(pickedFile.path);
+        _imageBytes = bytes;
       });
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -156,11 +154,11 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                     });
                   },
                 ),
-                Image Picker
+                // Image Picker
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_image == null ? 'No image selected' : 'Image selected'),
+                    Text(_imageBytes == null ? 'No image selected' : 'Image selected'),
                     TextButton(
                       onPressed: _pickImage,
                       child: const Text('Pick Image'),
@@ -170,26 +168,42 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      final request = context.read<CookieRequest>();
-                      final response = await request.postJson(
-                        "http://127.0.0.1:8000/create-journal-flutter/",
-                        jsonEncode({
+                      try {
+                        final request = context.read<CookieRequest>();
+                        
+                        String? imageBase64;
+                        if (_imageBytes != null) {
+                          imageBase64 = base64Encode(_imageBytes!);
+                        }
+
+                        // Create the request data
+                        final requestData = jsonEncode({
                           'title': _title,
                           'content': _content,
                           'place_name': _placeName,
-                          'souvenir': _souvenirId, // Optional
-                          // Include image if needed
-                        }),
-                      );
+                          'souvenir': _souvenirId,
+                          'image': imageBase64,
+                        });
 
-                      if (response['success']) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Journal entry created!")),
+                        final response = await request.postJson(
+                          "http://127.0.0.1:8000/create-journal-flutter/",
+                          requestData,
                         );
-                        Navigator.pop(context); // Go back to the previous screen
-                      } else {
+
+                        print('Response: $response'); // Debug print
+
+                        if (response != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Journal entry created!")),
+                          );
+                          Navigator.pop(context);
+                        } else {
+                          throw Exception('Failed to create journal');
+                        }
+                      } catch (e) {
+                        print('Error: $e'); // Debug print
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Error creating journal entry.")),
+                          SnackBar(content: Text("Error: ${e.toString()}")),
                         );
                       }
                     }
