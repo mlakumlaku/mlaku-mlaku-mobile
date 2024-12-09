@@ -7,7 +7,7 @@ import '../../widgets/bottom_navbar.dart';
 class CollectionsScreen extends StatelessWidget {
   final List<Collection> collections;
 
-  const CollectionsScreen({Key? key, required this.collections}) : super(key: key);
+  const CollectionsScreen({super.key, required this.collections});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +28,8 @@ class CollectionsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.flag, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
@@ -96,9 +96,9 @@ class CollectionsScreen extends StatelessWidget {
                         children: [
                           Container(
                             height: 120,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                              image: const DecorationImage(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                              image: DecorationImage(
                                 image: NetworkImage(
                                   'https://via.placeholder.com/150', // Replace with your image URL
                                 ),
@@ -133,7 +133,7 @@ class CollectionsScreen extends StatelessWidget {
                                   children: collection.places.take(3).map((place) {
                                     return Chip(
                                       label: Text(
-                                        place.placeName,
+                                        place.name,
                                         style: const TextStyle(fontSize: 12),
                                         overflow: TextOverflow.ellipsis,
                                       ),
