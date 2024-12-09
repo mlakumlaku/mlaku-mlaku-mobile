@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:mlaku_mlaku/journal/screens/journal_home.dart'; // Ganti dengan path yang sesuai
+import 'package:mlaku_mlaku/collections/screens/collections_screen.dart';
+import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
+import 'package:mlaku_mlaku/models/collections.dart';
+import 'package:mlaku_mlaku/services/collection_services.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavBar extends StatefulWidget {
   final Function(int) onTap;
 
-  BottomNavBar({required this.onTap});
+  const BottomNavBar({required this.onTap});
 
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
@@ -12,8 +17,9 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
+  final CollectionService _collectionService = CollectionService();
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
@@ -28,10 +34,39 @@ class _BottomNavBarState extends State<BottomNavBar> {
         context,
         MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
       );
+    } else if (index == 3) {
+      final request = context.read<CookieRequest>();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FutureBuilder(
+            future: _collectionService.fetchCollections(request),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else if (snapshot.hasError) {
+                return Scaffold(
+                  body: Center(
+                    child: Text('Failed to load collections: ${snapshot.error}'),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                final collections = snapshot.data as List<Collection>;
+                return CollectionsScreen(collections: collections);
+              } else {
+                return const Scaffold(
+                  body: Center(child: Text('No collections available.')),
+                );
+              }
+            },
+          ),
+        ),
+      );
     } else {
-      // Show snackbar for other items
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Page belum tersedia')),
+        const SnackBar(content: Text('Page belum tersedia')),
       );
     }
   }
@@ -62,8 +97,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
       backgroundColor: Colors.redAccent,
       selectedItemColor: Colors.redAccent,
       unselectedItemColor: Colors.black,
-      // Add hover effects
-      mouseCursor: SystemMouseCursors.click,
     );
   }
 }

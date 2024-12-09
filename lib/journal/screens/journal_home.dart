@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:provider/provider.dart'; // This is necessary for using context.read
 import 'package:intl/intl.dart'; // Add this import
 import 'package:mlaku_mlaku/models/journal_entry.dart';
+import 'package:mlaku_mlaku/journal/screens/my_journal.dart';
 
 class JournalHome extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class _JournalHomeState extends State<JournalHome> {
 
   Future<void> _fetchJournals() async {
     final request = context.read<CookieRequest>();
-    final response = await request.get('http://127.0.0.1:8000/json/');
+    final response = await request.get('http://127.0.0.1:8000/get-journals/');
     setState(() {
       _journals = journalEntryFromJson(jsonEncode(response));
     });
@@ -94,7 +95,7 @@ class _JournalHomeState extends State<JournalHome> {
   
     // Construct full URL with media path
     try {
-      return 'http://127.0.0.1:8000/media/$cleanPath';
+      return 'http://127.0.0.1:8000/$cleanPath';
     } catch (e) {
       print('Error constructing image URL: $e');
       return ''; // Or return default image URL
@@ -243,7 +244,10 @@ class _JournalHomeState extends State<JournalHome> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to My Journal History
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyJournal()),
+                  );
                 },
                 child: Text('My Journal'),
               ),
