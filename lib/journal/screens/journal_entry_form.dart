@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -26,6 +28,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   @override
   void initState() {
     super.initState();
+    _loadPlaces();
   }
 
   Future<void> _loadPlaces() async {

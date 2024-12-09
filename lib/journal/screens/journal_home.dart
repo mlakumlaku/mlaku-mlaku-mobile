@@ -122,7 +122,7 @@ class _JournalHomeState extends State<JournalHome> {
                   )
                 : Icon(Icons.person), // Default icon
             ),
-            title: Text(fields.authorUsername),
+            title: Text(fields.author.toString()),
             subtitle: Text(formattedDate),
           ),
 
