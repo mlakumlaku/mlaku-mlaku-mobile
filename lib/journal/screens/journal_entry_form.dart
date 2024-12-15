@@ -147,13 +147,13 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                   value: _souvenirId,
                   items: _souvenirs.map((souvenir) {
                     return DropdownMenuItem<String>(
-                      value: souvenir['id'].toString(), // Convert id to string
-                      child: Text(souvenir['name']),
+                      value: souvenir['id'].toString(), // Store ID as value
+                      child: Text(souvenir['name']), // Display name
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      _souvenirId = value;
+                      _souvenirId = value; // Store selected ID
                     });
                   },
                 ),

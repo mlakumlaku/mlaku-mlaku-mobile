@@ -123,7 +123,7 @@ class _JournalHomeState extends State<JournalHome> {
                   )
                 : Icon(Icons.person), // Default icon
             ),
-            title: Text(fields.author.toString()),
+            title: Text(fields.authorUsername),
             subtitle: Text(formattedDate),
           ),
 
@@ -153,15 +153,24 @@ class _JournalHomeState extends State<JournalHome> {
                   Icon(Icons.location_on, size: 16),
                   SizedBox(width: 4),
                   Text(fields.placeName!),
-                  if (fields.souvenir != null) ...[
-                    SizedBox(width: 16),
-                    Icon(Icons.card_giftcard, size: 16),
-                    SizedBox(width: 4),
-                    Text('Souvenir ID: ${fields.souvenir}'),
-                  ],
                 ],
               ),
             ),
+          // Move the souvenir information here
+          if (fields.souvenir != null) ...[
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.card_giftcard, size: 16),
+                  SizedBox(width: 4),
+                  Text('Souvenir: ${fields.souvenirName}'),
+                  SizedBox(width: 16),
+                  Text('Price: ${fields.souvenirPrice ?? 'Unknown'}'),
+                ],
+              ),
+            ),
+          ],
 
           // Update the image section
           if (fields.image.isNotEmpty)
