@@ -2,6 +2,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'dart:convert';
 import '../models/collections.dart';
 import '../models/place.dart';
+import 'package:http/http.dart' as http;
 
 class CollectionService {
   final String baseUrl = "http://127.0.0.1:8000";
@@ -15,15 +16,32 @@ class CollectionService {
     }
   }
 
-  Future<void> createCollection(CookieRequest request, String name) async {
-    final response = await request.post('$baseUrl/placeCollection/create/', {
-      'name': name,
-    });
+Future<void> createCollection(CookieRequest request, String name) async {
+  try {
+    print('Attempting to create collection with name: $name'); // Debug print
 
-    if (!response['success']) {
-      throw Exception('Failed to create collection: ${response['error']}');
+    final response = await request.post(
+      '$baseUrl/placeCollection/create_collection_json/',
+      {
+        'name': name,
+      },
+    );
+
+    print('Response received: $response'); // Debug print
+
+    if (response['success'] == true) {
+      print('Collection created: ${response['collection']}');
+      // Handle successful creation
+    } else {
+      print('Failed to create collection: ${response['error']}');
+      throw Exception(response['error'] ?? 'Unknown error');
     }
+  } catch (e) {
+    print('Error creating collection: $e');
+    rethrow;
   }
+}
+
 
   Future<void> deleteCollection(CookieRequest request, int collectionId) async {
     final response = await request.post(
