@@ -53,8 +53,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   ),
                 );
               } else if (snapshot.hasData) {
-                final collections = snapshot.data as List<Collection>;
-                return CollectionsScreen(collections: collections);
+              final collections = snapshot.data as List<Collection>;
+              final request = CookieRequest(); // Pastikan ini adalah instance yang valid
+              return CollectionsScreen(
+                collections: collections,
+                request: request,
+              );
               } else {
                 return const Scaffold(
                   body: Center(child: Text('No collections available.')),
