@@ -9,6 +9,8 @@ import 'package:mlaku_mlaku/models/journal_entry.dart';
 import 'package:mlaku_mlaku/journal/screens/my_journal.dart';
 import 'package:intl/intl.dart';
 import 'package:mlaku_mlaku/journal/screens/journal_detail.dart';
+import 'package:mlaku_mlaku/screens/login.dart';
+import 'package:flutter/foundation.dart';
 
 class JournalHome extends StatefulWidget {
   @override
@@ -33,11 +35,12 @@ class _JournalHomeState extends State<JournalHome> {
     });
   }
 
+  // Future<void> _handleLike(int journalId, isLiked) async {
+  //   String action = isLiked ? 'unlike' : 'like'; // Define action here
   Future<void> _handleLike(int journalId) async {
     try {
-      final request = context.read<CookieRequest>();
-      
-      // Menggunakan journal_id sebagai bagian dari URL
+      final request = context.read<CustomCookieRequest>();
+
       final response = await request.post(
         "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
         {},  // Empty map karena data dikirim via URL
@@ -60,7 +63,7 @@ class _JournalHomeState extends State<JournalHome> {
       }
       
     } catch (e) {
-      print('Error liking journal: $e');
+      print('Error liking journal: $e'); // Now action is defined
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to like journal. Please try again.'),
@@ -130,6 +133,8 @@ class _JournalHomeState extends State<JournalHome> {
 
   Widget _buildJournalCard(JournalEntry journal) {
     final fields = journal.fields;
+    final currentUserId = context.read<CustomCookieRequest>().userId; // Get current user ID
+    final isLiked = fields.likes.contains(currentUserId); // Check if the current user has liked the journal
     final jakartaTimeZone = Duration(hours: 7); // Jakarta UTC+7
     final createdAtInJakarta = fields.createdAt.toUtc().add(jakartaTimeZone);
     final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(createdAtInJakarta);
@@ -139,7 +144,7 @@ class _JournalHomeState extends State<JournalHome> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => JournalDetailPage(journal: journal), // Navigasi ke halaman detail
+            builder: (context) => JournalDetailPage(journal: journal), // Navigate to detail page
           ),
         );
       },
@@ -256,10 +261,10 @@ class _JournalHomeState extends State<JournalHome> {
                           Icon(
                             fields.likes.isNotEmpty ? Icons.favorite : Icons.favorite_border,
                             size: 20,
-                            color: Colors.red,
+                            color: Colors.red, // Set color based on like status
                           ),
                           SizedBox(width: 4),
-                          Text('${fields.likes.length}'),
+                          Text('${fields.likes.length}'), // Display the like count
                         ],
                       ),
                     ),
@@ -286,12 +291,23 @@ class _JournalHomeState extends State<JournalHome> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Get current user object
+    final userName = currentUser.userName; // Access the userName
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Journal Home'),
       ),
       body: Column(
         children: [
+          // User Info
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Logged in as: $userName', // Display current user's name
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
           // Button Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

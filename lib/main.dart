@@ -6,17 +6,37 @@ import 'package:provider/provider.dart';
 import 'package:mlaku_mlaku/screens/login.dart';
 import 'widgets/bottom_navbar.dart';
 import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
-
+import 'package:mlaku_mlaku/screens/login.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+// import 'path/to/your/custom_cookie_request.dart'; // Adjust the import path
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider<CustomCookieRequest>(
+      create: (context) => CustomCookieRequest(),
+      child: const MyApp(),
+    ),
+  );
 }
+// void main() {
+//   runApp(
+//     ChangeNotifierProvider(
+//       create: (context) => CustomCookieRequest(),
+//       child: MyApp(),
+//     ),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Ambil objek pengguna saat ini
+    final userName = currentUser.userName; // Ambil nama pengguna
+
     return Provider(
       create: (_) {
         CookieRequest request = CookieRequest();
@@ -35,7 +55,12 @@ class MyApp extends StatelessWidget {
             bodyMedium: const TextStyle(color: Colors.black54), // Teks abu-abu
           ),
         ),
-        home: const LoginPage(),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text('Welcome to Mlaku-Mlaku!'), // Tampilkan nama pengguna di AppBar
+          ),
+          body: const LoginPage(), // Halaman login
+        ),
       ),
     );
   }
@@ -55,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Get current user object
+    final userName = currentUser.userName;
     return Scaffold(
       backgroundColor: const Color(0xFF282A3A), // Ubah warna latar belakang di sini
       appBar: AppBar(
@@ -77,9 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   const Icon(Icons.person, color: Colors.white), // Ikon pengguna
                   const SizedBox(width: 4),
-                  const Text(
-                    'tesbaru', // Ganti dengan nama pengguna yang sesuai
-                    style: TextStyle(color: Colors.white),
+                  Text(
+                    '$userName', // Tampilkan nama pengguna
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),

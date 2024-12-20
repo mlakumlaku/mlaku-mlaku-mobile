@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:mlaku_mlaku/models/journal_entry.dart';
 import 'journal_home.dart';
+import 'package:mlaku_mlaku/screens/login.dart';
+import 'package:flutter/foundation.dart';
 
 class MyJournal extends StatefulWidget {
   @override
@@ -329,12 +331,23 @@ class _MyJournalState extends State<MyJournal> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Get current user object
+    final userName = currentUser.userName; // Now this should work
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Journal History'),
       ),
       body: Column(
         children: [
+          // User Info
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Logged in as: $userName', // Display current user's name
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
           // Journal List
           Expanded(
             child: RefreshIndicator(
