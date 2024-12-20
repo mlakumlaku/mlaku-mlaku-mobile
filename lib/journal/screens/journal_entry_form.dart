@@ -11,10 +11,12 @@ import '../../models/journal_entry.dart';  // Update this import line
 
 class JournalEntryFormPage extends StatefulWidget {
   final JournalEntry? journalToEdit;
+  final Function? onUpdate;
 
   const JournalEntryFormPage({
     Key? key,
     this.journalToEdit,
+    this.onUpdate,
   }) : super(key: key);
 
   @override
@@ -162,17 +164,15 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
       );
 
       if (response != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Journal updated successfully!")),
-        );
-        Navigator.pop(context, () {
-          // Callback untuk refresh halaman parent
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Journal updated!")),
-            );
-          }
-        });
+        if (widget.onUpdate != null) {
+          widget.onUpdate!();
+        }
+        Navigator.pop(context);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Journal updated successfully!")),
+          );
+        }
       }
     } catch (e) {
       print('Error updating journal: $e');
@@ -269,9 +269,8 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       if (widget.journalToEdit != null) {
-                        await _updateJournal();  // Update existing journal
+                        await _updateJournal();
                       } else {
-                        // Existing create logic
                         try {
                           final request = context.read<CookieRequest>();
                           
@@ -294,13 +293,15 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                           );
 
                           if (response != null) {
-                            Navigator.pop(context, () {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Journal created!")),
-                                );
-                              }
-                            });
+                            if (widget.onUpdate != null) {
+                              widget.onUpdate!();
+                            }
+                            Navigator.pop(context);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Journal created!")),
+                              );
+                            }
                           }
                         } catch (e) {
                           print('Error: $e');

@@ -35,23 +35,35 @@ class _JournalHomeState extends State<JournalHome> {
     try {
       final request = context.read<CookieRequest>();
       
-      // Updated URL to match Django URL pattern
+      // Menggunakan journal_id sebagai bagian dari URL
       final response = await request.post(
-        "http://127.0.0.1:8000/like/$journalId/",
-        {},
+        "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
+        {},  // Empty map karena data dikirim via URL
       );
 
       print('Like response: $response'); // Debug print
 
-      if (response != null && (response['liked'] != null || response['error'] != null)) {
-        await _fetchJournals(); // Refresh journals to update likes
+      if (response['status'] == 'success') {
+        await _fetchJournals();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Successfully updated like'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
-        throw Exception('Invalid response format');
+        throw Exception(response['message'] ?? 'Failed to like journal');
       }
+      
     } catch (e) {
       print('Error liking journal: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to like journal. Please try again.')),
+        SnackBar(
+          content: Text('Failed to like journal. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -63,14 +75,26 @@ class _JournalHomeState extends State<JournalHome> {
   }
 
   void _navigateToCreateEntry() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => JournalEntryFormPage()),
+      MaterialPageRoute(
+        builder: (context) => JournalEntryFormPage(
+          onUpdate: () => _fetchJournals(), // Pass callback for create
+        ),
+      ),
     );
+  }
 
-    if (result != null) {
-      result(); // Call the refresh method
-    }
+  void _navigateToEditEntry(JournalEntry journal) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => JournalEntryFormPage(
+          journalToEdit: journal,
+          onUpdate: () => _fetchJournals(), // Pass callback
+        ),
+      ),
+    );
   }
 
   String _getFullImageUrl(String imagePath) {
@@ -252,11 +276,15 @@ class _JournalHomeState extends State<JournalHome> {
                 child: Text('For You'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  final shouldRefresh = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(builder: (context) => MyJournal()),
                   );
+                  
+                  if (shouldRefresh == true) {
+                    await _fetchJournals();
+                  }
                 },
                 child: Text('My Journal'),
               ),
@@ -281,12 +309,16 @@ class _JournalHomeState extends State<JournalHome> {
         ],
       ),
       bottomNavigationBar: BottomNavBar(
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 2) {
-            Navigator.push(
+            final shouldRefresh = await Navigator.push<bool>(
               context,
               MaterialPageRoute(builder: (context) => JournalHome()),
             );
+            
+            if (shouldRefresh == true) {
+              await _fetchJournals(); // Refresh when returning from MyJournal
+            }
           }
         },
       ),

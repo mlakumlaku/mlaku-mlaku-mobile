@@ -69,14 +69,14 @@ class _MyJournalState extends State<MyJournal> {
   }
 
   void _navigateToCreateEntry() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => JournalEntryFormPage()),
+      MaterialPageRoute(
+        builder: (context) => JournalEntryFormPage(
+          onUpdate: () => _fetchMyJournals(), // Pass callback
+        ),
+      ),
     );
-
-    if (result != null) {
-      result(); // Call the refresh method
-    }
   }
 
   String _getFullImageUrl(String imagePath) {
@@ -112,17 +112,19 @@ class _MyJournalState extends State<MyJournal> {
     try {
       final request = context.read<CookieRequest>();
       final response = await request.post(
-        "http://127.0.0.1:8000/delete-journal/$journalId/",
+        "http://127.0.0.1:8000/delete-journal-flutter/$journalId/",
         {},
       );
 
       if (response['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Journal deleted successfully')),
-        );
-        await _fetchMyJournals(); // Refresh the list
+        await _fetchMyJournals(); // Refresh after delete
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Journal deleted successfully')),
+          );
+        }
       } else {
-        throw Exception('Failed to delete journal');
+        throw Exception(response['message'] ?? 'Failed to delete journal');
       }
     } catch (e) {
       print('Error deleting journal: $e');
@@ -133,16 +135,15 @@ class _MyJournalState extends State<MyJournal> {
   }
 
   void _navigateToEditEntry(JournalEntry journal) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => JournalEntryFormPage(journalToEdit: journal),
+        builder: (context) => JournalEntryFormPage(
+          journalToEdit: journal,
+          onUpdate: () => _fetchMyJournals(), // Pass callback
+        ),
       ),
     );
-
-    if (result != null) {
-      result(); // Call the refresh method
-    }
   }
 
   Widget _buildJournalCard(JournalEntry journal) {
