@@ -43,23 +43,35 @@ class _MyJournalState extends State<MyJournal> {
     try {
       final request = context.read<CookieRequest>();
       
-      // Updated URL to match Django URL pattern
+      // Menggunakan journal_id sebagai bagian dari URL
       final response = await request.post(
-        "http://127.0.0.1:8000/like/$journalId/",
-        {},
+        "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
+        {},  // Empty map karena data dikirim via URL
       );
 
       print('Like response: $response'); // Debug print
 
-      if (response != null && (response['liked'] != null || response['error'] != null)) {
-        await _fetchMyJournals(); // Refresh journals to update likes
+      if (response['status'] == 'success') {
+        await _fetchMyJournals(); // Refresh journals after liking
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Successfully updated like'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
-        throw Exception('Invalid response format');
+        throw Exception(response['message'] ?? 'Failed to like journal');
       }
+      
     } catch (e) {
       print('Error liking journal: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to like journal. Please try again.')),
+        SnackBar(
+          content: Text('Failed to like journal. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -148,7 +160,9 @@ class _MyJournalState extends State<MyJournal> {
 
   Widget _buildJournalCard(JournalEntry journal) {
     final fields = journal.fields;
-    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(fields.createdAt);
+    final jakartaTimeZone = Duration(hours: 7); // Jakarta UTC+7
+    final createdAtInJakarta = fields.createdAt.toUtc().add(jakartaTimeZone); // Konversi waktu ke Jakarta
+    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(createdAtInJakarta); // Format tanggal
 
     return Card(
       margin: EdgeInsets.all(8.0),
@@ -317,11 +331,10 @@ class _MyJournalState extends State<MyJournal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Journals'),
+        title: Text('Your Journal History'),
       ),
       body: Column(
         children: [
-          // Removed Button Row
           // Journal List
           Expanded(
             child: RefreshIndicator(
@@ -332,6 +345,16 @@ class _MyJournalState extends State<MyJournal> {
                   return _buildJournalCard(_myJournals[index]);
                 },
               ),
+            ),
+          ),
+          // Button to go back to Journal Home
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true); // Kembali dan mengembalikan nilai true
+              },
+              child: Text('For You'),
             ),
           ),
         ],

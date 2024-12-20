@@ -7,6 +7,8 @@ import 'package:provider/provider.dart'; // This is necessary for using context.
 import 'package:intl/intl.dart'; // Add this import
 import 'package:mlaku_mlaku/models/journal_entry.dart';
 import 'package:mlaku_mlaku/journal/screens/my_journal.dart';
+import 'package:intl/intl.dart';
+import 'package:mlaku_mlaku/journal/screens/journal_detail.dart';
 
 class JournalHome extends StatefulWidget {
   @override
@@ -128,142 +130,165 @@ class _JournalHomeState extends State<JournalHome> {
 
   Widget _buildJournalCard(JournalEntry journal) {
     final fields = journal.fields;
-    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(fields.createdAt);
+    final jakartaTimeZone = Duration(hours: 7); // Jakarta UTC+7
+    final createdAtInJakarta = fields.createdAt.toUtc().add(jakartaTimeZone);
+    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(createdAtInJakarta);
 
-    return Card(
-      margin: EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            leading: CircleAvatar(
-              child: fields.image != null && fields.image.isNotEmpty
-                ? Image.network(
-                    _getFullImageUrl(fields.image),
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
-                      return Icon(Icons.person); // Fallback icon
-                    },
-                  )
-                : Icon(Icons.person), // Default icon
-            ),
-            title: Text(fields.authorUsername),
-            subtitle: Text(formattedDate),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JournalDetailPage(journal: journal), // Navigasi ke halaman detail
           ),
-
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fields.title,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Text(fields.content),
-              ],
+        );
+      },
+      child: Card(
+        margin: EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                child: fields.image != null && fields.image.isNotEmpty
+                  ? Image.network(
+                      _getFullImageUrl(fields.image),
+                      errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error');
+                        return Icon(Icons.person); // Fallback icon
+                      },
+                    )
+                  : Icon(Icons.person), // Default icon
+              ),
+              title: Text(fields.authorUsername),
+              subtitle: Text(formattedDate),
             ),
-          ),
 
-          if (fields.placeName != null && fields.placeName!.isNotEmpty)
             Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Row(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on, size: 16),
-                  SizedBox(width: 4),
-                  Text(fields.placeName!),
+                  Text(
+                    fields.title,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(fields.content),
                 ],
               ),
             ),
-          // Move the souvenir information here
-          if (fields.souvenir != null) ...[
+
+            if (fields.placeName != null && fields.placeName!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16),
+                    SizedBox(width: 4),
+                    Text(fields.placeName!),
+                  ],
+                ),
+              ),
+            // Move the souvenir information here
+            if (fields.souvenir != null) ...[
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.card_giftcard, size: 16),
+                    SizedBox(width: 4),
+                    Text('Souvenir: ${fields.souvenirName}'),
+                    SizedBox(width: 16),
+                    Text('Price: ${fields.souvenirPrice ?? 'Unknown'}'),
+                  ],
+                ),
+              ),
+            ],
+
+            // Update the image section
+            if (fields.image.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% of screen height
+                  ),
+                  width: double.infinity,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9, // Default aspect ratio if needed
+                    child: Image.network(
+                      _getFullImageUrl(fields.image),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error');
+                        print('Image path: ${fields.image}');
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.error),
+                              Text('Failed to load image'),
+                              Text(_getFullImageUrl(fields.image)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
             Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Icon(Icons.card_giftcard, size: 16),
-                  SizedBox(width: 4),
-                  Text('Souvenir: ${fields.souvenirName}'),
-                  SizedBox(width: 16),
-                  Text('Price: ${fields.souvenirPrice ?? 'Unknown'}'),
+                  InkWell(
+                    onTap: () => _handleLike(journal.pk),
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            fields.likes.isNotEmpty ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: Colors.red,
+                          ),
+                          SizedBox(width: 4),
+                          Text('${fields.likes.length}'),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
-
-          // Update the image section
-          if (fields.image.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: 8.0),
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% of screen height
-                ),
-                width: double.infinity,
-                child: AspectRatio(
-                  aspectRatio: 16 / 9, // Default aspect ratio if needed
-                  child: Image.network(
-                    _getFullImageUrl(fields.image),
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
-                      print('Image path: ${fields.image}');
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.error),
-                            Text('Failed to load image'),
-                            Text(_getFullImageUrl(fields.image)),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => _handleLike(journal.pk),
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          fields.likes.isNotEmpty ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                        SizedBox(width: 4),
-                        Text('${fields.likes.length}'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _navigateToMyJournal() async {
+    final shouldRefresh = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => MyJournal()),
+    );
+
+    if (shouldRefresh == true) {
+      await _fetchJournals(); // Refresh jika ada perubahan
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Journals'),
+        title: Text('Journal Home'),
       ),
       body: Column(
         children: [
@@ -276,16 +301,7 @@ class _JournalHomeState extends State<JournalHome> {
                 child: Text('For You'),
               ),
               ElevatedButton(
-                onPressed: () async {
-                  final shouldRefresh = await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyJournal()),
-                  );
-                  
-                  if (shouldRefresh == true) {
-                    await _fetchJournals();
-                  }
-                },
+                onPressed: _navigateToMyJournal,
                 child: Text('My Journal'),
               ),
               ElevatedButton(

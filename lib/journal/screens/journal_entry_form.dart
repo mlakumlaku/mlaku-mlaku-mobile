@@ -186,7 +186,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.journalToEdit != null ? 'Edit Journal Entry' : 'Create Journal Entry'),
+        title: Text(widget.journalToEdit != null ? 'Edit Journal Entry' : 'Create Your Own Journal'),
       ),
       body: Form(
         key: _formKey,
@@ -239,7 +239,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                   items: _souvenirs.map((souvenir) {
                     return DropdownMenuItem<String>(
                       value: souvenir['id'].toString(),
-                      child: Text('${souvenir['name']} - Rp${souvenir['price']}'),
+                      child: Text('${souvenir['name']}'),
                     );
                   }).toList(),
                   onChanged: (value) {
