@@ -24,7 +24,16 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
   @override
   void initState() {
     super.initState();
+    // Get the request object
     final request = Provider.of<CookieRequest>(context, listen: false);
+    
+    // Print whether we're logged in. This should print true if the login was successful.
+    print("Are we logged in?: ${request.loggedIn}");
+
+    // Ensure the domain here matches the domain you used for login.
+    // If you used http://localhost:8000 for login, do the same for your PlaceService URLs.
+    // Check place_service.dart to ensure you're using `http://localhost:8000` and not `127.0.0.1`.
+    
     _placeService = PlaceService(request);
     _loadPlaceDetail();
   }
@@ -39,19 +48,32 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
     final content = _commentController.text.trim();
     if (content.isEmpty || _rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please provide both comment and rating.')),
+        const SnackBar(content: Text('Please provide both comment and rating.')),
       );
       return;
     }
+
+    // Before calling addComment, we can again check if logged in
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    if (!request.loggedIn) {
+      // If not logged in, show a message or redirect
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You are not logged in. Please log in first.')),
+      );
+      return;
+    }
+
     try {
       await _placeService.addComment(widget.placeId, content, _rating);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Comment added successfully!')),
+        const SnackBar(content: Text('Comment added successfully!')),
       );
       _commentController.clear();
       _rating = 0;
       _loadPlaceDetail(); // Refresh data after adding comment
     } catch (e) {
+      // Print the full error and check if it’s HTML or JSON
+      print("Full error response: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add comment: $e')),
       );
@@ -84,7 +106,7 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Place Detail'),
+        title: const Text('Place Detail'),
       ),
       body: FutureBuilder<Place>(
         future: _placeFuture,
@@ -104,17 +126,17 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
                 children: [
                   Text(
                     place.name,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   Text('Average Rating: ${place.averageRating}/5'),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(place.description),
-                  SizedBox(height: 16),
-                  Divider(),
-                  Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
                   if (place.comments.isEmpty)
-                    Text('No comments yet. Be the first to comment!'),
+                    const Text('No comments yet. Be the first to comment!'),
                   for (var c in place.comments) ...[
                     ListTile(
                       title: Text(c.username),
@@ -127,42 +149,42 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
                         ],
                       ),
                     ),
-                    Divider(),
+                    const Divider(),
                   ],
 
-                  SizedBox(height: 16),
-                  Text('Souvenirs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 16),
+                  const Text('Souvenirs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
                   if (place.souvenirs.isEmpty)
-                    Text('No souvenirs available.'),
+                    const Text('No souvenirs available.'),
                   for (var s in place.souvenirs) ...[
                     ListTile(
                       title: Text(s.name),
                       subtitle: Text('Price: ${s.price}, Stock: ${s.stock}'),
                     ),
-                    Divider(),
+                    const Divider(),
                   ],
 
                   if (isLoggedIn) ...[
-                    SizedBox(height: 16),
-                    Text('Add a Comment', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    const Text('Add a Comment', style: TextStyle(fontWeight: FontWeight.bold)),
                     TextField(
                       controller: _commentController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Write your comment...',
                       ),
                       maxLines: 3,
                     ),
-                    SizedBox(height: 8),
-                    Text('Your Rating:'),
+                    const SizedBox(height: 8),
+                    const Text('Your Rating:'),
                     _buildRatingStars(),
                     ElevatedButton(
                       onPressed: _submitComment,
-                      child: Text('Submit'),
+                      child: const Text('Submit'),
                     ),
                   ] else ...[
-                    SizedBox(height: 16),
-                    Text('Please log in to add a comment.'),
+                    const SizedBox(height: 16),
+                    const Text('Please log in to add a comment.'),
                   ]
                 ],
               ),
