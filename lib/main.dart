@@ -1,5 +1,3 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +8,7 @@ import 'package:mlaku_mlaku/screens/login.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:mlaku_mlaku/place/screens/place_detail_page.dart';
 // import 'path/to/your/custom_cookie_request.dart'; // Adjust the import path
 
 void main() {
@@ -163,14 +162,13 @@ class _MyHomePageState extends State<MyHomePage> {
               style: TextStyle(fontSize: 14, color: Colors.white54),
             ),
             const SizedBox(height: 16),
-            // Tambahkan konten lain di sini jika diperlukan
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
                 children: [
-                  _buildCard('Bukit Lintang Sewu', 'assets/bukit_lintang_sewu.jpg'),
-                  _buildCard('Bunker Kaliadem Merapi', 'assets/bunker_kaliadem.jpg'),
-                  _buildCard('De Mata Museum Jogja', 'assets/de_mata_museum.jpg'),
+                  _buildCard('Bukit Lintang Sewu', 'assets/bukit_lintang_sewu.jpg', placeId: 1),
+                  _buildCard('Bunker Kaliadem Merapi', 'assets/bunker_kaliadem.jpg', placeId: 2),
+                  _buildCard('De Mata Museum Jogja', 'assets/de_mata_museum.jpg', placeId: 3),
                 ],
               ),
             ),
@@ -201,26 +199,37 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildCard(String title, String imagePath) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Expanded(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            ),
+  Widget _buildCard(String title, String imagePath, {required int placeId}) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the detail page for this place
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlaceDetailPage(placeId: placeId),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        );
+      },
+      child: Card(
+        elevation: 4,
+        margin: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Expanded(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -147,9 +147,9 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                         children: [
                           Container(
                             height: 120,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                              image: const DecorationImage(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                              image: DecorationImage(
                                 image: NetworkImage(
                                   'https://via.placeholder.com/150', // Replace with your image URL
                                 ),
@@ -184,7 +184,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                                   children: collection.places.take(3).map((place) {
                                     return Chip(
                                       label: Text(
-                                        place.placeName,
+                                        place.name,
                                         style: const TextStyle(fontSize: 12),
                                         overflow: TextOverflow.ellipsis,
                                       ),

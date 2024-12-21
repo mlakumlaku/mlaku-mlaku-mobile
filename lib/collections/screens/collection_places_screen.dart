@@ -61,13 +61,13 @@ class _CollectionPlacesScreenState extends State<CollectionPlacesScreen> {
                     final place = _places[index];
                     return Card(
                       child: ListTile(
-                        leading: CircleAvatar(
+                        leading: const CircleAvatar(
                           backgroundImage: NetworkImage(
                             'https://via.placeholder.com/150', // Replace with actual image URL
                           ),
                         ),
-                        title: Text(place.placeName),
-                        subtitle: Text(place.descriptionPlace),
+                        title: Text(place.name),
+                        subtitle: Text(place.description),
                       ),
                     );
                   },
