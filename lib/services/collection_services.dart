@@ -49,8 +49,8 @@ Future<void> createCollection(CookieRequest request, String name) async {
 Future<void> deleteCollection(CookieRequest request, int collectionId) async {
   try {
     final response = await request.post(
-      '$baseUrl/placeCollection/delete/$collectionId/',  // Make sure this matches your Django URL pattern
-      {},
+      '$baseUrl/placeCollection/delete_flut/$collectionId/',  // Make sure this matches your Django URL pattern
+      json.encode({},)
     );
 
     if (response['success'] == true) {
