@@ -9,39 +9,38 @@ Place placeFromJson(String str) => Place.fromJson(json.decode(str));
 String placeToJson(Place data) => json.encode(data.toJson());
 
 class Place {
-    int id;
-    String name;
-    String description;
-    int averageRating;
-    List<Comment> comments;
-    List<Souvenir> souvenirs;
+  final int id;
+  final String name;
+  final String description;
+  final String? imageUrl;
 
-    Place({
-        required this.id,
-        required this.name,
-        required this.description,
-        required this.averageRating,
-        required this.comments,
-        required this.souvenirs,
-    });
+  Place({
+    required this.id,
+    required this.name,
+    required this.description,
+    this.imageUrl,
+  });
 
-    factory Place.fromJson(Map<String, dynamic> json) => Place(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        averageRating: json["average_rating"],
-        comments: List<Comment>.from(json["comments"].map((x) => Comment.fromJson(x))),
-        souvenirs: List<Souvenir>.from(json["souvenirs"].map((x) => Souvenir.fromJson(x))),
+  factory Place.fromJson(Map<String, dynamic> json) {
+    // Handle case where fields might be nested
+    final fields = json['fields'] as Map<String, dynamic>? ?? json;
+    
+    return Place(
+      id: json['pk'] ?? json['id'] ?? 0,  // Try both pk and id
+      name: fields['name'] ?? '',
+      description: fields['description'] ?? '',
+      imageUrl: fields['image_url'],
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "description": description,
-        "average_rating": averageRating,
-        "comments": List<dynamic>.from(comments.map((x) => x.toJson())),
-        "souvenirs": List<dynamic>.from(souvenirs.map((x) => x.toJson())),
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'image_url': imageUrl,
     };
+  }
 }
 
 class Comment {
