@@ -3,11 +3,81 @@ import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
 import '../../models/collections.dart';
 import 'collection_places_screen.dart';
 import '../../widgets/bottom_navbar.dart';
+import '../../services/collection_services.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
-class CollectionsScreen extends StatelessWidget {
+extension ListExtensions<T> on List<T> {
+  void addIf(bool condition, T value) {
+    if (condition) add(value);
+  }
+}
+
+class CollectionsScreen extends StatefulWidget {
   final List<Collection> collections;
+  final CookieRequest request;
 
-  const CollectionsScreen({super.key, required this.collections});
+  const CollectionsScreen({super.key, required this.collections, required this.request});
+
+  @override
+  State<CollectionsScreen> createState() => _CollectionsScreenState();
+}
+
+class _CollectionsScreenState extends State<CollectionsScreen> {
+  late List<Collection> collections;
+
+  @override
+  void initState() {
+    super.initState();
+    collections = widget.collections;
+  }
+
+  Future<void> _createNewCollection(BuildContext context) async {
+    TextEditingController collectionNameController = TextEditingController();
+
+    // Show dialog to input collection name
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Create New Collection'),
+          content: TextField(
+            controller: collectionNameController,
+            decoration: const InputDecoration(hintText: 'Enter collection name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String name = collectionNameController.text.trim();
+                if (name.isNotEmpty) {
+                  try {
+                    await CollectionService().createCollection(widget.request, name);
+                    // Refresh collections list
+                    final updatedCollections =
+                        await CollectionService().fetchCollections(widget.request);
+                    setState(() {
+                      collections = updatedCollections;
+                    });
+                    Navigator.of(context).pop(); // Close dialog
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to create collection: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +85,7 @@ class CollectionsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Collections',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white,),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF282A3A),
@@ -26,29 +96,10 @@ class CollectionsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Row(
-                  children: const [
-                    Icon(Icons.flag, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      '15 Items',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(width: 16),
-                    Icon(Icons.visibility, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      '1,891 Views',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
                 ElevatedButton(
-                  onPressed: () {
-                    // Add functionality for creating a collection
-                  },
+                  onPressed: () => _createNewCollection(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A90E2),
                     shape: RoundedRectangleBorder(
@@ -182,11 +233,5 @@ class CollectionsScreen extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-extension ListExtensions<T> on List<T> {
-  void addIf(bool condition, T value) {
-    if (condition) add(value);
   }
 }
