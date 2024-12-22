@@ -53,11 +53,6 @@ class Collection {
   }
 
   String? getCollectionImageUrl() {
-  for (Place place in places) {
-    if (place.imageUrl != null && place.imageUrl!.isNotEmpty) {
-      return place.imageUrl; // Kembalikan URL gambar dari tempat pertama yang memiliki gambar
-    }
-  }
   return null; // Tidak ada gambar, kembalikan null
 }
 
