@@ -69,6 +69,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/images/defaultpic.jpg
     - assets/images/
     - assets/DATASET_MLAKUMLAKU_FIX_FILLED_FORMATTED.json
 
