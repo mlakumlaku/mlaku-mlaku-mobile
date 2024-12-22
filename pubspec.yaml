@@ -66,6 +66,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/DATASET_MLAKUMLAKU_FIX_FILLED_FORMATTED.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -101,3 +104,31 @@ flutter:
   # assets:
   #     - assets/DATASET.json
   #   - assets/templeborobodur.jpeg
+# name: mlaku_mlaku
+# description: "A new Flutter project."
+# publish_to: 'none'
+
+# version: 1.0.0+1
+
+# environment:
+#   sdk: ^3.5.4
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+#   cupertino_icons: ^1.0.8
+#   provider: ^6.0.3
+#   image_picker: ^0.8.5+3
+#   intl: ^0.20.1
+#   http: ^1.2.2
+
+# dev_dependencies:
+#   flutter_test:
+#     sdk: flutter
+#   flutter_lints: ^4.0.0
+
+# flutter:
+#   uses-material-design: true
+#   assets:
+#     - assets/images/
+#     - assets/DATASET_MLAKUMLAKU_FIX_FILLED_FORMATTED.json
