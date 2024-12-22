@@ -161,12 +161,13 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final response = await request.postJson(
         "$baseUrl/auth/register/",
+        jsonEncode(
         {
           "username": username,
           "password1": password1,
           "password2": password2,
-        },
-      );
+        
+    }));
 
       setState(() {
         _isLoading = false;
@@ -202,7 +203,7 @@ class _RegisterPageState extends State<RegisterPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Registration Failed'),
+        title: const Text('Registration Status'),
         content: Text(message),
         actions: [
           TextButton(
