@@ -3,11 +3,91 @@ import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
 import '../../models/collections.dart';
 import 'collection_places_screen.dart';
 import '../../widgets/bottom_navbar.dart';
+import '../../services/collection_services.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
-class CollectionsScreen extends StatelessWidget {
+extension ListExtensions<T> on List<T> {
+  void addIf(bool condition, T value) {
+    if (condition) add(value);
+  }
+}
+
+class CollectionsScreen extends StatefulWidget {
   final List<Collection> collections;
+  final CookieRequest request;
 
-  const CollectionsScreen({Key? key, required this.collections}) : super(key: key);
+  const CollectionsScreen({super.key, required this.collections, required this.request});
+
+  @override
+  State<CollectionsScreen> createState() => _CollectionsScreenState();
+}
+
+class _CollectionsScreenState extends State<CollectionsScreen> {
+  late List<Collection> collections;
+  String _sortOrder = "A-Z"; // Default sort order
+
+  @override
+  void initState() {
+    super.initState();
+    collections = widget.collections;
+  }
+
+  Future<void> _createNewCollection(BuildContext context) async {
+    TextEditingController collectionNameController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Create New Collection'),
+          content: TextField(
+            controller: collectionNameController,
+            decoration: const InputDecoration(hintText: 'Enter collection name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String name = collectionNameController.text.trim();
+                if (name.isNotEmpty) {
+                  try {
+                    await CollectionService().createCollection(widget.request, name);
+                    final updatedCollections =
+                        await CollectionService().fetchCollections(widget.request);
+                    setState(() {
+                      collections = updatedCollections;
+                    });
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to create collection: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _sortCollections(String order) {
+    setState(() {
+      if (order == "A-Z") {
+        collections.sort((a, b) => a.name.compareTo(b.name));
+      } else if (order == "Z-A") {
+        collections.sort((a, b) => b.name.compareTo(a.name));
+      }
+      _sortOrder = order;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +95,11 @@ class CollectionsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Collections',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white,),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF282A3A),
@@ -28,27 +112,8 @@ class CollectionsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: const [
-                    Icon(Icons.flag, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      '15 Items',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(width: 16),
-                    Icon(Icons.visibility, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      '1,891 Views',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
                 ElevatedButton(
-                  onPressed: () {
-                    // Add functionality for creating a collection
-                  },
+                  onPressed: () => _createNewCollection(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A90E2),
                     shape: RoundedRectangleBorder(
@@ -57,7 +122,33 @@ class CollectionsScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Create',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: _sortOrder,
+                  style: const TextStyle(color: Colors.white), // Atur warna tulisan menjadi putih
+                  dropdownColor: const Color.fromARGB(255, 63, 122, 86),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      _sortCollections(newValue);
+                    }
+                  },
+                  items: <String>['A-Z', 'Z-A']
+                      .map((value) => DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              'Sort $value',
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ))
+                      .toList(),
+                  icon: const Icon(Icons.sort),
+                  underline: Container(
+                    height: 2,
+                    color: const Color(0xFF4A90E2),
                   ),
                 ),
               ],
@@ -67,9 +158,9 @@ class CollectionsScreen extends StatelessWidget {
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 8, // Lebih kecil dari sebelumnya
+                  mainAxisSpacing: 8,  // Lebih kecil dari sebelumnya
+                  childAspectRatio: 0.9, // Menyesuaikan proporsi card
                 ),
                 itemCount: collections.length,
                 itemBuilder: (context, index) {
@@ -87,55 +178,59 @@ class CollectionsScreen extends StatelessWidget {
                       );
                     },
                     child: Card(
+                      margin: const EdgeInsets.all(6.0), // Margin lebih kecil
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12), // Ukuran border tetap
                       ),
-                      elevation: 4,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            height: 120,
+                            height: 80, // Lebih kecil dari sebelumnya
                             decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                              image: const DecorationImage(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                              image: DecorationImage(
                                 image: NetworkImage(
-                                  'https://via.placeholder.com/150', // Replace with your image URL
+                                  collection.getCollectionImageUrl() ??
+                                      'https://via.placeholder.com/150',
                                 ),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0), // Padding lebih kecil
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   collection.name,
                                   style: const TextStyle(
-                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 14, // Ukuran font lebih kecil
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 2),
                                 Text(
                                   'Created ${collection.createdAt}',
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11, // Ukuran font lebih kecil
                                     color: Colors.grey,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 4),
                                 Wrap(
                                   spacing: 4,
                                   runSpacing: 4,
                                   children: collection.places.take(3).map((place) {
                                     return Chip(
                                       label: Text(
-                                        place.placeName,
-                                        style: const TextStyle(fontSize: 12),
-                                        overflow: TextOverflow.ellipsis,
+                                        place.name,
+                                        style: const TextStyle(
+                                          fontSize: 11, // Ukuran font chip lebih kecil
+                                          color: Colors.black,
+                                        ),
                                       ),
                                     );
                                   }).toList()
@@ -144,7 +239,10 @@ class CollectionsScreen extends StatelessWidget {
                                       Chip(
                                         label: Text(
                                           '+${collection.places.length - 3} more',
-                                          style: const TextStyle(fontSize: 12),
+                                          style: const TextStyle(
+                                            fontSize: 11, // Ukuran font chip lebih kecil
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -159,6 +257,7 @@ class CollectionsScreen extends StatelessWidget {
                 },
               ),
             ),
+
           ],
         ),
       ),
@@ -166,13 +265,11 @@ class CollectionsScreen extends StatelessWidget {
       bottomNavigationBar: BottomNavBar(
         onTap: (index) {
           if (index == 2) {
-            // Navigate to the journal home
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => JournalHome()), // Replace with your journal screen
+              MaterialPageRoute(builder: (context) => JournalHome()),
             );
           } else if (index == 0) {
-            // Handle home navigation
             Navigator.popUntil(context, (route) => route.isFirst);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -182,11 +279,5 @@ class CollectionsScreen extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-extension ListExtensions<T> on List<T> {
-  void addIf(bool condition, T value) {
-    if (condition) add(value);
   }
 }

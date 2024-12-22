@@ -1,3 +1,5 @@
+// lib/screens/register.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mlaku_mlaku/screens/login.dart';
@@ -15,6 +17,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false; // To manage loading state
 
   @override
   Widget build(BuildContext context) {
@@ -110,56 +114,102 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 24.0),
                   ElevatedButton(
-                    onPressed: () async {
-                      String username = _usernameController.text;
-                      String password1 = _passwordController.text;
-                      String password2 = _confirmPasswordController.text;
-
-                      // Cek kredensial
-                      // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
-                      // Untuk menyambungkan Android emulator dengan Django pada localhost,
-                      // gunakan URL http://10.0.2.2/
-                      final response = await request.postJson(
-                          "http://127.0.0.1:8000/auth/register/",
-                          jsonEncode({
-                            "username": username,
-                            "password1": password1,
-                            "password2": password2,
-                          }));
-                      if (context.mounted) {
-                        if (response['status'] == 'success') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Successfully registered!'),
-                            ),
-                          );
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Failed to register!'),
-                            ),
-                          );
-                        }
-                      }
-                    },
+                    onPressed: _isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                     ),
-                    child: const Text('Register'),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : const Text('Register'),
                   ),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _register() async {
+    final request = context.read<CookieRequest>();
+    String username = _usernameController.text.trim();
+    String password1 = _passwordController.text.trim();
+    String password2 = _confirmPasswordController.text.trim();
+
+    if (username.isEmpty || password1.isEmpty || password2.isEmpty) {
+      _showErrorDialog('All fields are required.');
+      return;
+    }
+
+    if (password1 != password2) {
+      _showErrorDialog('Passwords do not match.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String baseUrl = "http://localhost:8000"; // Use 10.0.2.2 for Android Emulator
+
+    try {
+      final response = await request.postJson(
+        "$baseUrl/auth/register/",
+        {
+          "username": username,
+          "password1": password1,
+          "password2": password2,
+        },
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response['status'] == true) { // Changed to boolean
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully registered!'),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const LoginPage()),
+        );
+      } else {
+        // If the server returns a specific message, display it
+        String errorMessage = response['message'] ?? 'Failed to register!';
+        _showErrorDialog(errorMessage);
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Handle network or parsing errors
+      _showErrorDialog('An error occurred. Please try again.');
+      print('Registration Error: $e'); // For debugging purposes
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Registration Failed'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }
