@@ -156,6 +156,8 @@ class _LoginPageState extends State<LoginPage> {
                       // Check if Django side said status = True
                       if (response['status'] == true) {
                         print("Raw response: $response");
+                        final customRequest = context.read<CustomCookieRequest>();
+
 
                         // If using pbp_django_auth, request.loggedIn should be true
                         print("Are we logged in? ${request.loggedIn}");
@@ -172,6 +174,8 @@ class _LoginPageState extends State<LoginPage> {
                         // Show success message
                         final message = response['message'] ?? 'Login sukses!';
                         final uname = response['username'] ?? username;
+                        customRequest.userName = uname;  // Add this line to set the username
+
 
                         if (!mounted) return;
                         Navigator.pushReplacement(
