@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mlaku_mlaku/collections/screens/collection_detail_page.dart';
+import 'package:mlaku_mlaku/collections/screens/collections_page.dart';
 import 'package:mlaku_mlaku/collections/screens/collections_screen.dart';
 import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
 import 'package:mlaku_mlaku/models/collections.dart';
@@ -17,7 +19,7 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
-  final CollectionService _collectionService = CollectionService();
+  // final CollectionService _collectionService = CollectionService();
 
   void _onItemTapped(int index) async {
     setState(() {
@@ -35,45 +37,57 @@ class _BottomNavBarState extends State<BottomNavBar> {
         MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
       );
     } else if (index == 3) {
-      final request = context.read<CookieRequest>();
-      Navigator.push(
+        Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => FutureBuilder(
-            future: _collectionService.fetchCollections(request),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              } else if (snapshot.hasError) {
-                return Scaffold(
-                  body: Center(
-                    child: Text('Failed to load collections: ${snapshot.error}'),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-              final collections = snapshot.data as List<Collection>;
-              final request = CookieRequest(); // Pastikan ini adalah instance yang valid
-              return CollectionsScreen(
-                collections: collections,
-                request: request,
-              );
-              } else {
-                return const Scaffold(
-                  body: Center(child: Text('No collections available.')),
-                );
-              }
-            },
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => const CollectionsPage()),
       );
-    } else {
+      } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Page belum tersedia')),
       );
     }
   }
+    
+
+      // final request = context.read<CookieRequest>();
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => FutureBuilder(
+      //       future: _collectionService.getCollections(request),
+      //       builder: (context, snapshot) {
+      //         if (snapshot.connectionState == ConnectionState.waiting) {
+      //           return const Scaffold(
+      //             body: Center(child: CircularProgressIndicator()),
+      //           );
+      //         } else if (snapshot.hasError) {
+      //           return Scaffold(
+      //             body: Center(
+      //               child: Text('Failed to load collections: ${snapshot.error}'),
+      //             ),
+      //           );
+      //         } else if (snapshot.hasData) {
+      //         final collections = snapshot.data as List<Collection>;
+      //         final request = CookieRequest(); // Pastikan ini adalah instance yang valid
+      //         return CollectionsScreen(
+      //           collections: collections,
+      //           request: request,
+  //     //         );
+  //             } else {
+  //               return const Scaffold(
+  //                 body: Center(child: Text('No collections available.')),
+  //               );
+  //             }
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Page belum tersedia')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
