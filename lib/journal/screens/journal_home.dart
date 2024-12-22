@@ -41,7 +41,7 @@ class _JournalHomeState extends State<JournalHome> {
       final request = context.read<CustomCookieRequest>();
 
       final response = await request.post(
-        "https://nur-khoirunnisa-mlakumlaku.pbp.cs.ui.ac.id/",
+        "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
         {},  // Empty map karena data dikirim via URL
       );
 

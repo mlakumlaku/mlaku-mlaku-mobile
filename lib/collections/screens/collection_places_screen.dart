@@ -122,7 +122,7 @@ class _CollectionPlacesScreenState extends State<CollectionPlacesScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PlaceDetailPage(placeId: place.id),
+                              builder: (context) => PlaceDetailScreen(placeId: place.id),
                             ),
                           );
                         },
