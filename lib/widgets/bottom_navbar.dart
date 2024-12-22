@@ -5,6 +5,7 @@ import 'package:mlaku_mlaku/models/collections.dart';
 import 'package:mlaku_mlaku/services/collection_services.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:mlaku_mlaku/screens/home_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
   final Function(int) onTap;
@@ -20,60 +21,67 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final CollectionService _collectionService = CollectionService();
 
   void _onItemTapped(int index) async {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() {
+    _selectedIndex = index;
+  });
 
-    if (index == 0) {
-      // Navigate to Home
-      Navigator.popUntil(context, (route) => route.isFirst);
-    } else if (index == 2) {
-      // Navigate to Journals
-      // Ganti dengan halaman yang sesuai
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
-      );
-    } else if (index == 3) {
-      final request = context.read<CookieRequest>();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FutureBuilder(
-            future: _collectionService.fetchCollections(request),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              } else if (snapshot.hasError) {
-                return Scaffold(
-                  body: Center(
-                    child: Text('Failed to load collections: ${snapshot.error}'),
-                  ),
-                );
-              } else if (snapshot.hasData) {
+  if (index == 0) {
+    // Navigate to Home
+    Navigator.popUntil(context, (route) => route.isFirst);
+  } else if (index == 1) {
+    // Navigate to HomeScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  } else if (index == 2) {
+    // Navigate to Journals
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => JournalHome()),
+    );
+  } else if (index == 3) {
+    final request = context.read<CookieRequest>();
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FutureBuilder(
+          future: _collectionService.fetchCollections(request),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            } else if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text('Failed to load collections: ${snapshot.error}'),
+                ),
+              );
+            } else if (snapshot.hasData) {
               final collections = snapshot.data as List<Collection>;
               final request = CookieRequest(); // Pastikan ini adalah instance yang valid
               return CollectionsScreen(
                 collections: collections,
                 request: request,
               );
-              } else {
-                return const Scaffold(
-                  body: Center(child: Text('No collections available.')),
-                );
-              }
-            },
-          ),
+            } else {
+              return const Scaffold(
+                body: Center(child: Text('No collections available.')),
+              );
+            }
+          },
         ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Page belum tersedia')),
-      );
-    }
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Page belum tersedia')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

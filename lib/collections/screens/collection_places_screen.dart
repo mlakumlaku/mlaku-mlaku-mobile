@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mlaku_mlaku/place/screens/place_detail_page.dart';
 import '../../models/place.dart';
 import '../../services/collection_services.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -45,11 +46,59 @@ class _CollectionPlacesScreenState extends State<CollectionPlacesScreen> {
     }
   }
 
+  Future<void> _deleteCollection() async {
+    final request = context.read<CookieRequest>();
+    try {
+      await _collectionService.deleteCollection(request, widget.collectionId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Collection deleted successfully!')),
+        );
+        Navigator.pop(context); // Navigate back to the collections page
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete collection: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.collectionName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final shouldDelete = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Delete Collection'),
+                    content: const Text('Are you sure you want to delete this collection?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (shouldDelete == true) {
+                _deleteCollection();
+              }
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -68,10 +117,19 @@ class _CollectionPlacesScreenState extends State<CollectionPlacesScreen> {
                         ),
                         title: Text(place.name),
                         subtitle: Text(place.description),
+                        onTap: () {
+                          // Navigate to the place detail page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PlaceDetailScreen(placeId: place.id),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
-                ),
+                ),  
     );
   }
 }

@@ -8,41 +8,52 @@
 
 // // String placeToJson(Place data) => json.encode(data.toJson());
 
-// // class Place {
-// //     int id;
-// //     String name;
-// //     String description;
-// //     int averageRating;
-// //     List<Comment> comments;
-// //     List<Souvenir> souvenirs;
+class Place {
+  final int id;
+  final String name;
+  final String description;
+  final double averageRating;
+  final List<Comment> comments;
+  final List<Souvenir> souvenirs;
 
-// //     Place({
-// //         required this.id,
-// //         required this.name,
-// //         required this.description,
-// //         required this.averageRating,
-// //         required this.comments,
-// //         required this.souvenirs,
-// //     });
+  Place({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.averageRating,
+    required this.comments,
+    required this.souvenirs,
+  });
 
-// //     factory Place.fromJson(Map<String, dynamic> json) => Place(
-// //         id: json["id"],
-// //         name: json["name"],
-// //         description: json["description"],
-// //         averageRating: json["average_rating"],
-// //         comments: List<Comment>.from(json["comments"].map((x) => Comment.fromJson(x))),
-// //         souvenirs: List<Souvenir>.from(json["souvenirs"].map((x) => Souvenir.fromJson(x))),
-// //     );
+  factory Place.fromJson(Map<String, dynamic> json) {
+  return Place(
+    id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    // Handle null or missing average_rating
+    averageRating: json['average_rating'] != null 
+        ? (json['average_rating'] is int 
+            ? (json['average_rating'] as int).toDouble() 
+            : json['average_rating'] as double)
+        : 0.0,  // Default to 0.0 if null
+    comments: (json['comments'] as List?)?.map((comment) => 
+        Comment.fromJson(comment)).toList() ?? [],
+    souvenirs: (json['souvenirs'] as List?)?.map((souvenir) => 
+        Souvenir.fromJson(souvenir)).toList() ?? [],
+  );
+}
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      // 'image_url': imageUrl,
+    };
+  }
+}
 
-// //     Map<String, dynamic> toJson() => {
-// //         "id": id,
-// //         "name": name,
-// //         "description": description,
-// //         "average_rating": averageRating,
-// //         "comments": List<dynamic>.from(comments.map((x) => x.toJson())),
-// //         "souvenirs": List<dynamic>.from(souvenirs.map((x) => x.toJson())),
-// //     };
-// // }
+
 
 // // class Comment {
 // //     int id;
@@ -242,38 +253,3 @@ class Comment {
   }
 }
 
-// models/place.dart
-class Place {
-  final int id;
-  final String name;
-  final String description;
-  final double averageRating;
-  final List<Comment> comments;
-  final List<Souvenir> souvenirs;
-
-  Place({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.averageRating,
-    required this.comments,
-    required this.souvenirs,
-  });
-
-  factory Place.fromJson(Map<String, dynamic> json) {
-    return Place(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      averageRating: (json['average_rating'] is int) 
-          ? json['average_rating'].toDouble() 
-          : json['average_rating'],
-      comments: (json['comments'] as List)
-          .map((comment) => Comment.fromJson(comment))
-          .toList(),
-      souvenirs: (json['souvenirs'] as List)
-          .map((souvenir) => Souvenir.fromJson(souvenir))
-          .toList(),
-    );
-  }
-}
