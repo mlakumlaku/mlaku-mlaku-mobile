@@ -93,3 +93,7 @@ Role ini merupakan role khusus yang dapat mengakses seluruh modul di dalam web M
 ## Link App Center:
 https://appcenter.ms/orgs/mlaku-mlaku2/apps/mlaku-mlaku/build/branches/main/builds/3
 https://install.appcenter.ms/orgs/mlaku-mlaku2/apps/mlaku-mlaku/releases/3
+
+
+## Link Video:
+https://drive.google.com/file/d/1zGka24jiDhAyDeUtYir4Mad1Q3B5S9i1/view?usp=drivesdk
