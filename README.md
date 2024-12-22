@@ -11,6 +11,7 @@
 - Deployment Web: 
 *Tentatif, bisa berubah ke web hosting/domain lain, jika ada perubahan terkait ini, README akan diubah secepatnya.
 - Project Timeline: https://docs.google.com/spreadsheets/d/1fNqWne6Nfua7cnaFnoAgCVqUhrwXRPXQNdAFQJin5Rk/edit?usp=sharing
+- Video: https://drive.google.com/file/d/1zGka24jiDhAyDeUtYir4Mad1Q3B5S9i1/view?usp=drivesdk
 
 ## Deskripsi Proyek
 Jogja adalah kota yang istimewa dengan sejuta cerita. Kota ini selalu punya berbagai cara untuk menanamkan rindu untuk kembali kepadanya. Namun, kurang lengkap rasanya bila kita mencintai Jogja tanpa pernah menyusuri setiap sudut kotanya. Bingung mau ke mana di Jogja? MlakuMlaku solusinya! MlakuMlaku berarti “Jalan-jalan” di bahasa Jawa. Seperti namanya, MlakuMlaku hadir untuk menemani kegiatan “Jalan-jalan” Anda di Kota Jogja. MlakuMlaku bukan hanya menampilkan destinasi wisata, tetapi juga menampilkan katalog souvenir yang dijual di lokasi wisata tersebut. MlakuMlaku menghadirkan berbagai fitur yang siap Anda nikmati selama mengeksplorasi Kota Jogja.
