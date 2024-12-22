@@ -87,3 +87,8 @@ Role ini merupakan role khusus yang dapat mengakses seluruh modul di dalam web M
     - https://www.jogjasouvenir.com/
     - https://www.indonesia.travel/id/id/ide-liburan/ke-jogja-jangan-lupa-beli-6-oleh-oleh-yang-unik-dan-istimewa-ini.html 
 4. Dataset Fix PBP A09: ristek.link/DATASET_MlakuMlaku
+
+
+## Link App Center:
+https://appcenter.ms/orgs/mlaku-mlaku2/apps/mlaku-mlaku/build/branches/main/builds/3
+https://install.appcenter.ms/orgs/mlaku-mlaku2/apps/mlaku-mlaku/releases/3
