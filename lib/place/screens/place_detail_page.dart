@@ -1,9 +1,10 @@
-// lib/screens/place_detail_page.dart
 import 'package:flutter/material.dart';
+import 'package:mlaku_mlaku/services/collection_services.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:mlaku_mlaku/services/place_service.dart';
 import 'package:mlaku_mlaku/models/place.dart';
+import 'package:mlaku_mlaku/models/collections.dart';
 
 class PlaceDetailPage extends StatefulWidget {
   final int placeId;
@@ -16,26 +17,22 @@ class PlaceDetailPage extends StatefulWidget {
 
 class _PlaceDetailPageState extends State<PlaceDetailPage> {
   late PlaceService _placeService;
+  late CollectionService _collectionService;
   Future<Place>? _placeFuture;
+  Future<List<Collection>>? _collectionsFuture;
 
   final _commentController = TextEditingController();
-  int _rating = 0; // rating from 1 to 5
+  int _rating = 0;
+  List<int> _selectedCollections = [];
 
   @override
   void initState() {
     super.initState();
-    // Get the request object
     final request = Provider.of<CookieRequest>(context, listen: false);
-    
-    // Print whether we're logged in. This should print true if the login was successful.
-    print("Are we logged in?: ${request.loggedIn}");
-
-    // Ensure the domain here matches the domain you used for login.
-    // If you used http://localhost:8000 for login, do the same for your PlaceService URLs.
-    // Check place_service.dart to ensure you're using `http://localhost:8000` and not `127.0.0.1`.
-    
     _placeService = PlaceService(request);
+    _collectionService = CollectionService();
     _loadPlaceDetail();
+    _loadCollections();
   }
 
   void _loadPlaceDetail() {
@@ -44,58 +41,110 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
     });
   }
 
-  Future<void> _submitComment() async {
-    final content = _commentController.text.trim();
-    if (content.isEmpty || _rating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please provide both comment and rating.')),
-      );
-      return;
-    }
-
-    // Before calling addComment, we can again check if logged in
+  void _loadCollections() {
     final request = Provider.of<CookieRequest>(context, listen: false);
-    if (!request.loggedIn) {
-      // If not logged in, show a message or redirect
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You are not logged in. Please log in first.')),
-      );
-      return;
-    }
-
-    try {
-      await _placeService.addComment(widget.placeId, content, _rating);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment added successfully!')),
-      );
-      _commentController.clear();
-      _rating = 0;
-      _loadPlaceDetail(); // Refresh data after adding comment
-    } catch (e) {
-      // Print the full error and check if it’s HTML or JSON
-      print("Full error response: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add comment: $e')),
-      );
-    }
+    setState(() {
+      _collectionsFuture = _collectionService.fetchCollections(request);
+    });
   }
 
-  Widget _buildRatingStars() {
-    return Row(
-      children: List.generate(5, (index) {
-        final starIndex = index + 1;
-        return IconButton(
-          icon: Icon(
-            starIndex <= _rating ? Icons.star : Icons.star_border,
-            color: Colors.yellow[700],
+  Future<void> _showAddToCollectionDialog() async {
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    if (!request.loggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to add to collections')),
+      );
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add to Collections'),
+          content: FutureBuilder<List<Collection>>(
+            future: _collectionsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Text('No collections available. Create one first!');
+              }
+
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: snapshot.data!.map((collection) {
+                        return CheckboxListTile(
+                          title: Text(collection.name),
+                          value: _selectedCollections.contains(collection.id),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedCollections.add(collection.id);
+                              } else {
+                                _selectedCollections.remove(collection.id);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-          onPressed: () {
-            setState(() {
-              _rating = starIndex;
-            });
-          },
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _selectedCollections.clear();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (_selectedCollections.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please select at least one collection')),
+                  );
+                  return;
+                }
+                
+                try {
+                  await _collectionService.addPlaceToCollections(
+                    request,
+                    widget.placeId,
+                    _selectedCollections,
+                  );
+                  
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Successfully added to collections!')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to add to collections: $e')),
+                    );
+                  }
+                }
+                _selectedCollections.clear();
+              },
+              child: const Text('Add'),
+            ),
+          ],
         );
-      }),
+      },
     );
   }
 
@@ -107,14 +156,26 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Place Detail'),
+        actions: [
+          if (isLoggedIn)
+            IconButton(
+              icon: const Icon(Icons.bookmark_add),
+              onPressed: _showAddToCollectionDialog,
+              tooltip: 'Add to Collection',
+            ),
+        ],
       ),
       body: FutureBuilder<Place>(
         future: _placeFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading place: ${snapshot.error}'));
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Place not found.'));
           }
 
           final place = snapshot.data!;
@@ -126,66 +187,54 @@ class _PlaceDetailPageState extends State<PlaceDetailPage> {
                 children: [
                   Text(
                     place.name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  Text('Average Rating: ${place.averageRating}/5'),
                   const SizedBox(height: 8),
                   Text(place.description),
                   const SizedBox(height: 16),
-                  const Divider(),
-                  const Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  if (place.comments.isEmpty)
-                    const Text('No comments yet. Be the first to comment!'),
-                  for (var c in place.comments) ...[
-                    ListTile(
-                      title: Text(c.username),
-                      subtitle: Text(c.content),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${c.rating}/5'),
-                          Icon(Icons.star, color: Colors.yellow[700], size: 20),
-                        ],
-                      ),
-                    ),
-                    const Divider(),
-                  ],
-
-                  const SizedBox(height: 16),
-                  const Text('Souvenirs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  if (place.souvenirs.isEmpty)
-                    const Text('No souvenirs available.'),
-                  for (var s in place.souvenirs) ...[
-                    ListTile(
-                      title: Text(s.name),
-                      subtitle: Text('Price: ${s.price}, Stock: ${s.stock}'),
-                    ),
-                    const Divider(),
-                  ],
-
                   if (isLoggedIn) ...[
-                    const SizedBox(height: 16),
-                    const Text('Add a Comment', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Your Comment:'),
                     TextField(
                       controller: _commentController,
                       decoration: const InputDecoration(
-                        hintText: 'Write your comment...',
+                        hintText: 'Write your comment here...',
+                        border: OutlineInputBorder(),
                       ),
-                      maxLines: 3,
+                      maxLines: 4,
                     ),
                     const SizedBox(height: 8),
-                    const Text('Your Rating:'),
-                    _buildRatingStars(),
-                    ElevatedButton(
-                      onPressed: _submitComment,
-                      child: const Text('Submit'),
+                    Row(
+                      children: [
+                        const Text('Your Rating:'),
+                        const SizedBox(width: 8),
+                        Row(
+                          children: List.generate(5, (index) => IconButton(
+                            icon: Icon(
+                              index < _rating ? Icons.star : Icons.star_border,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _rating = index + 1;
+                              });
+                            },
+                          )),
+                        ),
+                      ],
                     ),
-                  ] else ...[
                     const SizedBox(height: 16),
-                    const Text('Please log in to add a comment.'),
-                  ]
+                    ElevatedButton(
+                      onPressed: () {
+                        // Submit comment logic here
+                      },
+                      child: const Text('Submit Comment'),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _showAddToCollectionDialog,
+                      icon: const Icon(Icons.bookmark_add),
+                      label: const Text('Add to Collection'),
+                    ),
+                  ],
                 ],
               ),
             ),
