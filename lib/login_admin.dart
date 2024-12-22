@@ -61,6 +61,8 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
               ElevatedButton(
                 onPressed: _authorizeAdmin,
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3279E6),
+                  foregroundColor: const Color(0xFFF7F7F7),
                   minimumSize: const Size(130, 32),
                 ),
                 child: const Text("Authorize"),

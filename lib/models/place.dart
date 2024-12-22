@@ -1,10 +1,14 @@
 import 'package:mlaku_mlaku_mobile/models/souvenir.dart';
 import 'package:mlaku_mlaku_mobile/models/comment.dart';
+import 'dart:convert';
+
+List<Place> productFromJson(String str) => List<Place>.from(json.decode(str).map((x) => Place.fromJson(x)));
+String productToJson(List<Place> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Place {
   final int id;
-  final String name;
-  final String description;
+  String name;
+  String description;
   final double averageRating;
   final List<Comment> comments;
   final List<Souvenir> souvenirs;
@@ -32,6 +36,15 @@ class Place {
       souvenirs: (json['souvenirs'] as List)
           .map((souvenir) => Souvenir.fromJson(souvenir))
           .toList(),
-    );
-  }
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "description": description,
+    "averageRating": averageRating,
+    "comments": comments,
+    "souvenirs": souvenirs,
+  };
 }

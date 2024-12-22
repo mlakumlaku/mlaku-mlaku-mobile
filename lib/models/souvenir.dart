@@ -1,6 +1,7 @@
-import 'package:mlaku_mlaku_mobile/models/place.dart';
-import 'package:mlaku_mlaku_mobile/models/souvenir.dart';
-import 'package:mlaku_mlaku_mobile/models/comment.dart';
+import 'dart:convert';
+
+List<Souvenir> productFromJson(String str) => List<Souvenir>.from(json.decode(str).map((x) => Souvenir.fromJson(x)));
+String productToJson(List<Souvenir> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Souvenir {
   final int id;
@@ -23,4 +24,11 @@ class Souvenir {
       stock: json['stock'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "price": price,
+    "stock": stock,
+  };
 }

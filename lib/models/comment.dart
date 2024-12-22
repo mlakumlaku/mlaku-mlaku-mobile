@@ -1,6 +1,7 @@
-import 'package:mlaku_mlaku_mobile/models/place.dart';
-import 'package:mlaku_mlaku_mobile/models/souvenir.dart';
-import 'package:mlaku_mlaku_mobile/models/comment.dart';
+import 'dart:convert';
+
+List<Comment> productFromJson(String str) => List<Comment>.from(json.decode(str).map((x) => Comment.fromJson(x)));
+String productToJson(List<Comment> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Comment {
   final int id;
@@ -26,4 +27,12 @@ class Comment {
       createdAt: DateTime.parse(json['created_at']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": username,
+    "content": content,
+    "rating": rating,
+    "createdAt": createdAt,
+  };
 }
