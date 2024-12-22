@@ -35,8 +35,7 @@ class _JournalHomeState extends State<JournalHome> {
     });
   }
 
-  // Future<void> _handleLike(int journalId, isLiked) async {
-  //   String action = isLiked ? 'unlike' : 'like'; // Define action here
+
   Future<void> _handleLike(int journalId) async {
     try {
       final request = context.read<CustomCookieRequest>();

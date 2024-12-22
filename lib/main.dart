@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mlaku_mlaku/place/screens/place_detail_page.dart';
-// import 'path/to/your/custom_cookie_request.dart'; // Adjust the import path
+
 
 void main() {
   runApp(
@@ -19,14 +19,6 @@ void main() {
     ),
   );
 }
-// void main() {
-//   runApp(
-//     ChangeNotifierProvider(
-//       create: (context) => CustomCookieRequest(),
-//       child: MyApp(),
-//     ),
-//   );
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

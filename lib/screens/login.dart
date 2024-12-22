@@ -1,4 +1,3 @@
-// import 'package:mlaku_mlaku/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:mlaku_mlaku/screens/menu.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -7,7 +6,7 @@ import 'package:mlaku_mlaku/screens/register.dart';
 import 'package:mlaku_mlaku/main.dart'; 
 import 'package:flutter/foundation.dart';
 
-// TODO: Import halaman RegisterPage jika sudah dibuat
+
 
 class CustomCookieRequest extends CookieRequest with ChangeNotifier {
   String? _userId; // Private variable to store userId
@@ -32,7 +31,6 @@ class CustomCookieRequest extends CookieRequest with ChangeNotifier {
     notifyListeners(); // Notify listeners when userName changes
   }
 
-  // You can add any additional methods or properties if needed
 }
 
 void main() {
