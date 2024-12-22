@@ -144,9 +144,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GridView.count(
                 crossAxisCount: 2,
                 children: [
-                  _buildCard('Bukit Lintang Sewu', 'assets/bukit_lintang_sewu.jpg', placeId: 1),
-                  _buildCard('Bunker Kaliadem Merapi', 'assets/bunker_kaliadem.jpg', placeId: 2),
-                  _buildCard('De Mata Museum Jogja', 'assets/de_mata_museum.jpg', placeId: 3),
+                  _buildCard('Bukit Bintang Yogyakarta', 'assets/templeborobudur.jpeg', placeId: 1),
+                  _buildCard('Bukit Lintang Sewu', 'assets/bunker_kaliadem.jpg', placeId: 2),
+                  _buildCard('Bukit Paralayang, Watugupit', 'assets/de_mata_museum.jpg', placeId: 3),
                 ],
               ),
             ),
