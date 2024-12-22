@@ -112,7 +112,7 @@ class _CollectionPlacesScreenState extends State<CollectionPlacesScreen> {
                       child: ListTile(
                         leading: const CircleAvatar(
                           backgroundImage: NetworkImage(
-                            'https://via.placeholder.com/150', // Replace with actual image URL
+                            'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id', // Replace with actual image URL
                           ),
                         ),
                         title: Text(place.name),

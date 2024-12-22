@@ -27,7 +27,7 @@ class _MyJournalState extends State<MyJournal> {
   Future<void> _fetchMyJournals() async {
     try {
       final request = context.read<CookieRequest>();
-      final response = await request.get('http://127.0.0.1:8000/get-user-journals/'); // Gunakan endpoint get_journals_json
+      final response = await request.get('https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id'); // Gunakan endpoint get_journals_json
       
       if (response is List) {
         setState(() {
@@ -47,7 +47,7 @@ class _MyJournalState extends State<MyJournal> {
       
       // Menggunakan journal_id sebagai bagian dari URL
       final response = await request.post(
-        "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
+        "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",
         {},  // Empty map karena data dikirim via URL
       );
 
@@ -115,7 +115,7 @@ class _MyJournalState extends State<MyJournal> {
   
     // Construct full URL with media path
     try {
-      return 'http://127.0.0.1:8000/$cleanPath';
+      return 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
     } catch (e) {
       print('Error constructing image URL: $e');
       return ''; // Or return default image URL
@@ -126,7 +126,7 @@ class _MyJournalState extends State<MyJournal> {
     try {
       final request = context.read<CookieRequest>();
       final response = await request.post(
-        "http://127.0.0.1:8000/delete-journal-flutter/$journalId/",
+        "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",
         {},
       );
 

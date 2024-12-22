@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
 
   // Fungsi untuk mengambil data itinerary dari API
   Future<List<dynamic>> fetchItineraries() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/itineraries/'));
+    final response = await http.get(Uri.parse('https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);

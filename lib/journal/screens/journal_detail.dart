@@ -65,6 +65,6 @@ class JournalDetailPage extends StatelessWidget {
 
   String _getFullImageUrl(String imagePath) {
     if (imagePath.isEmpty) return '';
-    return 'http://127.0.0.1:8000/$imagePath';
+    return 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
   }
 } 

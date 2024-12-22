@@ -72,7 +72,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   Future<List<dynamic>> _fetchPlaces() async {
     try {
       final request = context.read<CookieRequest>();
-      final response = await request.get("http://127.0.0.1:8000/get-places/");
+      final response = await request.get("https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id");
       print('Raw response: $response');
       
       if (response != null) {
@@ -89,7 +89,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
 
   Future<void> _fetchSouvenirs(String placeName) async {
     final request = context.read<CookieRequest>();
-    final response = await request.get('http://127.0.0.1:8000/get-souvenirs/?place_name=$placeName');
+    final response = await request.get('https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id');
     print(response); // Check if souvenirs are fetched correctly
     setState(() {
       _souvenirs = response['souvenirs'] ?? []; // Access the 'souvenirs' key from response
@@ -115,7 +115,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    return 'http://127.0.0.1:8000$imagePath';
+    return 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
   }
 
   Widget _buildImagePreview() {
@@ -159,7 +159,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
       });
 
       final response = await request.postJson(
-        "http://127.0.0.1:8000/edit-journal-flutter/${widget.journalToEdit!.pk}/",  // Endpoint untuk update
+        "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",  // Endpoint untuk update
         requestData,
       );
 
@@ -288,7 +288,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                           });
 
                           final response = await request.postJson(
-                            "http://127.0.0.1:8000/create-journal-flutter/",
+                            "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",
                             requestData,
                           );
 

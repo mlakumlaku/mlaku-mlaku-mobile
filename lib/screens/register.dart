@@ -156,7 +156,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    final String baseUrl = "http://localhost:8000"; // Use 10.0.2.2 for Android Emulator
+    final String baseUrl = "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id"; // Use 10.0.2.2 for Android Emulator
 
     try {
       final response = await request.postJson(
