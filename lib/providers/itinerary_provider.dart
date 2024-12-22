@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/itinerary_model.dart';
 
 class ItineraryProvider extends ChangeNotifier {
-  final List<Itinerary> _itineraries = []; // Data statis dihapus
+  final List<Itinerary> _itineraries = []; 
 
   List<Itinerary> get itineraries => _itineraries;
 
