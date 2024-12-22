@@ -1,21 +1,23 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-
-// Your login page import
 import 'package:mlaku_mlaku/screens/login.dart';
-// Your journal home import
+import 'widgets/bottom_navbar.dart';
 import 'package:mlaku_mlaku/journal/screens/journal_home.dart';
-// Import the place detail page you created
+import 'package:mlaku_mlaku/screens/login.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:mlaku_mlaku/place/screens/place_detail_page.dart';
 
-// Bottom navigation bar widget import
-import 'widgets/bottom_navbar.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider<CustomCookieRequest>(
+      create: (context) => CustomCookieRequest(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +25,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Ambil objek pengguna saat ini
+    final userName = currentUser.userName; // Ambil nama pengguna
+
     return Provider(
       create: (_) {
         CookieRequest request = CookieRequest();
@@ -31,25 +36,31 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Mlaku-Mlaku',
         theme: ThemeData(
-          primaryColor: Colors.blueAccent,
+          primaryColor: Colors.blueAccent, // Warna utama
           colorScheme: ColorScheme.fromSwatch(
             primarySwatch: Colors.blue,
-          ).copyWith(secondary: Colors.redAccent),
-          scaffoldBackgroundColor: Colors.white,
+          ).copyWith(secondary: Colors.redAccent), // Menambahkan warna aksen
+          scaffoldBackgroundColor: Colors.white, // Latar belakang putih
           textTheme: TextTheme(
-            bodyLarge: const TextStyle(color: Colors.black),
-            bodyMedium: const TextStyle(color: Colors.black54),
+            bodyLarge: const TextStyle(color: Colors.black), // Teks hitam
+            bodyMedium: const TextStyle(color: Colors.black54), // Teks abu-abu
           ),
         ),
-        home: const LoginPage(),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text('Welcome to Mlaku-Mlaku!'), // Tampilkan nama pengguna di AppBar
+          ),
+          body: const LoginPage(), // Halaman login
+        ),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final String title;
   const MyHomePage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -57,39 +68,42 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Get current user object
+    final userName = currentUser.userName;
     return Scaffold(
-      backgroundColor: const Color(0xFF282A3A),
+      backgroundColor: const Color(0xFF282A3A), // Ubah warna latar belakang di sini
       appBar: AppBar(
-        backgroundColor: const Color(0xFF282A3A),
+        backgroundColor: const Color(0xFF282A3A), // Warna latar belakang AppBar
         title: Row(
           children: [
             const Expanded(
               child: Text(
                 'Mlaku-Mlaku',
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.center, // Menjaga teks di tengah
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
+                  color: Colors.white, // Warna teks putih
+                  fontSize: 28, // Ganti dengan ukuran font yang diinginkan
                 ),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
-                children: const [
-                  Icon(Icons.person, color: Colors.white),
-                  SizedBox(width: 4),
+                children: [
+                  const Icon(Icons.person, color: Colors.white), // Ikon pengguna
+                  const SizedBox(width: 4),
                   Text(
-                    'tesbaru',
-                    style: TextStyle(color: Colors.white),
+                    '$userName', // Tampilkan nama pengguna
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
+              icon: const Icon(Icons.logout, color: Colors.white), // Ikon logout
               onPressed: () {
                 // Navigasi kembali ke halaman login
                 Navigator.of(context).pushReplacement(
@@ -105,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text(
+            Center(
+              child: const Text(
                 'Touring Across Yogyakarta',
                 style: TextStyle(
                   fontSize: 50,
@@ -116,8 +130,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Center(
-              child: Text(
+            Center(
+              child: const Text(
                 'Start your next unforgettable trip with MlakuMaku!',
                 style: TextStyle(
                   fontSize: 30,
@@ -131,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Colors.white, // Warna hitam
               ),
             ),
             const SizedBox(height: 8),
@@ -153,6 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      
       bottomNavigationBar: BottomNavBar(
         onTap: (index) {
           // Handle navigation based on the index
@@ -163,12 +178,12 @@ class _MyHomePageState extends State<MyHomePage> {
             // Navigate to Journals
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => JournalHome()),
+              MaterialPageRoute(builder: (context) => JournalHome()), // Ganti dengan halaman yang sesuai
             );
           } else {
             // Show snackbar for other items
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Page belum tersedia')),
+              SnackBar(content: Text('Page belum tersedia')),
             );
           }
         },
