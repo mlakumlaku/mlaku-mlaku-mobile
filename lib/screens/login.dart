@@ -1,12 +1,37 @@
-// import 'package:mlaku_mlaku/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:mlaku_mlaku/screens/menu.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:mlaku_mlaku/screens/register.dart';
 import 'package:mlaku_mlaku/main.dart'; 
+import 'package:flutter/foundation.dart';
 
-// TODO: Import halaman RegisterPage jika sudah dibuat
+
+
+class CustomCookieRequest extends CookieRequest with ChangeNotifier {
+  String? _userId; // Private variable to store userId
+  String? _userName; // Private variable to store userName
+
+  // Getter for userId
+  String? get userId => _userId;
+  
+
+  // Setter for userId
+  set userId(String? id) {
+    _userId = id;
+    notifyListeners(); // Notify listeners when userId changes
+  }
+
+  // Getter for userName
+  String? get userName => _userName;
+
+  // Setter for userName
+  set userName(String? name) {
+    _userName = name;
+    notifyListeners(); // Notify listeners when userName changes
+  }
+
+}
 
 void main() {
   runApp(const LoginApp());
@@ -18,7 +43,7 @@ class LoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login',
+      title: 'Your Travel Friend!',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSwatch(
@@ -47,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Your Travel Buddy!'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -102,51 +127,55 @@ class _LoginPageState extends State<LoginPage> {
                       String username = _usernameController.text;
                       String password = _passwordController.text;
 
-                      // Cek kredensial
-                      // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
-                      // Untuk menyambungkan Android emulator dengan Django pada localhost,
-                      // gunakan URL http://10.0.2.2/
-                      final response = await request
-                          .login("http://127.0.0.1:8000/auth/login/", {
-                        'username': username,
-                        'password': password,
+                      // Access the request as CustomCookieRequest
+                      final request = context.read<CustomCookieRequest>();
+
+                      final response = await request.login("http://127.0.0.1:8000/auth/login/", {
+                          'username': username,
+                          'password': password,
                       });
 
                       if (request.loggedIn) {
-                        String message = response['message'];
-                        String uname = response['username'];
-                        if (context.mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MyHomePage(title: "Mlaku-Mlaku")),
-                          );
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text("$message Selamat datang, $uname.")),
-                            );
-                        }
+                          String message = response['message'];
+                          String uname = response['username'];
+                          
+                          // Ensure userId is a string
+                          String userId = response['userId'].toString(); // Convert to String if it's an int
+
+                          // Store userId and userName in CustomCookieRequest
+                          request.userId = userId; // Now this works without error
+                          request.userName = uname; // Set the userName
+
+                          if (context.mounted) {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const MyHomePage(title: "Mlaku-Mlaku")),
+                              );
+                              ScaffoldMessenger.of(context)
+                                  ..hideCurrentSnackBar()
+                                  ..showSnackBar(
+                                      SnackBar(content: Text("$message Selamat datang, $uname.")),
+                                  );
+                          }
                       } else {
-                        if (context.mounted) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Login Gagal'),
-                              content: Text(response['message']),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                          if (context.mounted) {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                      title: const Text('Login Gagal'),
+                                      content: Text(response['message']),
+                                      actions: [
+                                          TextButton(
+                                              child: const Text('OK'),
+                                              onPressed: () {
+                                                  Navigator.pop(context);
+                                              },
+                                          ),
+                                      ],
+                                  ),
+                              );
+                          }
                       }
                     },
                     style: ElevatedButton.styleFrom(

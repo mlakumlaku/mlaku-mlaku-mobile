@@ -7,6 +7,10 @@ import 'package:provider/provider.dart'; // This is necessary for using context.
 import 'package:intl/intl.dart'; // Add this import
 import 'package:mlaku_mlaku/models/journal_entry.dart';
 import 'package:mlaku_mlaku/journal/screens/my_journal.dart';
+import 'package:intl/intl.dart';
+import 'package:mlaku_mlaku/journal/screens/journal_detail.dart';
+import 'package:mlaku_mlaku/screens/login.dart';
+import 'package:flutter/foundation.dart';
 
 class JournalHome extends StatefulWidget {
   @override
@@ -31,27 +35,39 @@ class _JournalHomeState extends State<JournalHome> {
     });
   }
 
+
   Future<void> _handleLike(int journalId) async {
     try {
-      final request = context.read<CookieRequest>();
-      
-      // Updated URL to match Django URL pattern
+      final request = context.read<CustomCookieRequest>();
+
       final response = await request.post(
-        "http://127.0.0.1:8000/like/$journalId/",
-        {},
+        "http://127.0.0.1:8000/like-journal-flutter/$journalId/",
+        {},  // Empty map karena data dikirim via URL
       );
 
       print('Like response: $response'); // Debug print
 
-      if (response != null && (response['liked'] != null || response['error'] != null)) {
-        await _fetchJournals(); // Refresh journals to update likes
+      if (response['status'] == 'success') {
+        await _fetchJournals();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Successfully updated like'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
-        throw Exception('Invalid response format');
+        throw Exception(response['message'] ?? 'Failed to like journal');
       }
+      
     } catch (e) {
-      print('Error liking journal: $e');
+      print('Error liking journal: $e'); // Now action is defined
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to like journal. Please try again.')),
+        SnackBar(
+          content: Text('Failed to like journal. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -63,14 +79,26 @@ class _JournalHomeState extends State<JournalHome> {
   }
 
   void _navigateToCreateEntry() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => JournalEntryFormPage()),
+      MaterialPageRoute(
+        builder: (context) => JournalEntryFormPage(
+          onUpdate: () => _fetchJournals(), // Pass callback for create
+        ),
+      ),
     );
+  }
 
-    if (result != null) {
-      result(); // Call the refresh method
-    }
+  void _navigateToEditEntry(JournalEntry journal) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => JournalEntryFormPage(
+          journalToEdit: journal,
+          onUpdate: () => _fetchJournals(), // Pass callback
+        ),
+      ),
+    );
   }
 
   String _getFullImageUrl(String imagePath) {
@@ -104,136 +132,181 @@ class _JournalHomeState extends State<JournalHome> {
 
   Widget _buildJournalCard(JournalEntry journal) {
     final fields = journal.fields;
-    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(fields.createdAt);
+    final currentUserId = context.read<CustomCookieRequest>().userId; // Get current user ID
+    final isLiked = fields.likes.contains(currentUserId); // Check if the current user has liked the journal
+    final jakartaTimeZone = Duration(hours: 7); // Jakarta UTC+7
+    final createdAtInJakarta = fields.createdAt.toUtc().add(jakartaTimeZone);
+    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(createdAtInJakarta);
 
-    return Card(
-      margin: EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            leading: CircleAvatar(
-              child: fields.image != null && fields.image.isNotEmpty
-                ? Image.network(
-                    _getFullImageUrl(fields.image),
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
-                      return Icon(Icons.person); // Fallback icon
-                    },
-                  )
-                : Icon(Icons.person), // Default icon
-            ),
-            title: Text(fields.author.toString()),
-            subtitle: Text(formattedDate),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JournalDetailPage(journal: journal), // Navigate to detail page
           ),
-
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fields.title,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Text(fields.content),
-              ],
+        );
+      },
+      child: Card(
+        margin: EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                child: fields.image != null && fields.image.isNotEmpty
+                  ? Image.network(
+                      _getFullImageUrl(fields.image),
+                      errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error');
+                        return Icon(Icons.person); // Fallback icon
+                      },
+                    )
+                  : Icon(Icons.person), // Default icon
+              ),
+              title: Text(fields.authorUsername),
+              subtitle: Text(formattedDate),
             ),
-          ),
 
-          if (fields.placeName != null && fields.placeName!.isNotEmpty)
             Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Row(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on, size: 16),
-                  SizedBox(width: 4),
-                  Text(fields.placeName!),
-                  if (fields.souvenir != null) ...[
-                    SizedBox(width: 16),
-                    Icon(Icons.card_giftcard, size: 16),
-                    SizedBox(width: 4),
-                    Text('Souvenir ID: ${fields.souvenir}'),
-                  ],
+                  Text(
+                    fields.title,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(fields.content),
                 ],
               ),
             ),
 
-          // Update the image section
-          if (fields.image.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: 8.0),
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% of screen height
-                ),
-                width: double.infinity,
-                child: AspectRatio(
-                  aspectRatio: 16 / 9, // Default aspect ratio if needed
-                  child: Image.network(
-                    _getFullImageUrl(fields.image),
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
-                      print('Image path: ${fields.image}');
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.error),
-                            Text('Failed to load image'),
-                            Text(_getFullImageUrl(fields.image)),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+            if (fields.placeName != null && fields.placeName!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16),
+                    SizedBox(width: 4),
+                    Text(fields.placeName!),
+                  ],
                 ),
               ),
-            ),
+            // Move the souvenir information here
+            if (fields.souvenir != null) ...[
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.card_giftcard, size: 16),
+                    SizedBox(width: 4),
+                    Text('Souvenir: ${fields.souvenirName}'),
+                    SizedBox(width: 16),
+                    Text('Price: ${fields.souvenirPrice ?? 'Unknown'}'),
+                  ],
+                ),
+              ),
+            ],
 
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => _handleLike(journal.pk),
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          fields.likes.isNotEmpty ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                        SizedBox(width: 4),
-                        Text('${fields.likes.length}'),
-                      ],
+            // Update the image section
+            if (fields.image.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% of screen height
+                  ),
+                  width: double.infinity,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9, // Default aspect ratio if needed
+                    child: Image.network(
+                      _getFullImageUrl(fields.image),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error');
+                        print('Image path: ${fields.image}');
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.error),
+                              Text('Failed to load image'),
+                              Text(_getFullImageUrl(fields.image)),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
-              ],
+              ),
+
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () => _handleLike(journal.pk),
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            fields.likes.isNotEmpty ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: Colors.red, // Set color based on like status
+                          ),
+                          SizedBox(width: 4),
+                          Text('${fields.likes.length}'), // Display the like count
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  void _navigateToMyJournal() async {
+    final shouldRefresh = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => MyJournal()),
+    );
+
+    if (shouldRefresh == true) {
+      await _fetchJournals(); // Refresh jika ada perubahan
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.read<CustomCookieRequest>(); // Get current user object
+    final userName = currentUser.userName; // Access the userName
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Journals'),
+        title: Text('Journal Home'),
       ),
       body: Column(
         children: [
+          // User Info
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Logged in as: $userName', // Display current user's name
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
           // Button Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -243,12 +316,7 @@ class _JournalHomeState extends State<JournalHome> {
                 child: Text('For You'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyJournal()),
-                  );
-                },
+                onPressed: _navigateToMyJournal,
                 child: Text('My Journal'),
               ),
               ElevatedButton(
@@ -272,12 +340,16 @@ class _JournalHomeState extends State<JournalHome> {
         ],
       ),
       bottomNavigationBar: BottomNavBar(
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 2) {
-            Navigator.push(
+            final shouldRefresh = await Navigator.push<bool>(
               context,
               MaterialPageRoute(builder: (context) => JournalHome()),
             );
+            
+            if (shouldRefresh == true) {
+              await _fetchJournals(); // Refresh when returning from MyJournal
+            }
           }
         },
       ),
