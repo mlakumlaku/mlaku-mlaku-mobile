@@ -123,7 +123,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           )
                         : const Text('Register'),
                   ),
@@ -156,7 +157,8 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    final String baseUrl = "http://localhost:8000"; // Use 10.0.2.2 for Android Emulator
+    final String baseUrl =
+        "http://127.0.0.1:8000"; // Use 10.0.2.2 for Android Emulator
 
     try {
       final response = await request.postJson(
@@ -172,7 +174,8 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = false;
       });
 
-      if (response['status'] == true) { // Changed to boolean
+      if (response['status'] == true) {
+        // Changed to boolean
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Successfully registered!'),
@@ -180,8 +183,7 @@ class _RegisterPageState extends State<RegisterPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) => const LoginPage()),
+          MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
         // If the server returns a specific message, display it

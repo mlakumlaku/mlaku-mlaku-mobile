@@ -30,18 +30,18 @@ class Collection {
     );
   }
 
-  /// Convert Collection object to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'pk': id, // Convert `id` to `pk`
-      'fields': {
-        'name': name,
-        'created_at': createdAt,
-        'user': userId,
-        'places': places.map((place) => place.toJson()).toList(), // Include places
-      },
-    };
-  }
+  // /// Convert Collection object to JSON
+  // Map<String, dynamic> toJson() {
+  //   return {
+  //     'pk': id, // Convert `id` to `pk`
+  //     'fields': {
+  //       'name': name,
+  //       'created_at': createdAt,
+  //       'user': userId,
+  //       'places': places.map((place) => place.toJson()).toList(), // Include places
+  //     },
+  //   };
+  // }
 }
 
 class CollectionItem {

@@ -48,7 +48,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
       final request = context.read<CookieRequest>();
       final response = await request.get("http://127.0.0.1:8000/get-places/");
       print('Raw response: $response');
-      
+
       if (response != null) {
         final places = response['places'];
         print('Fetched places: $places');
@@ -63,10 +63,12 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
 
   Future<void> _fetchSouvenirs(String placeName) async {
     final request = context.read<CookieRequest>();
-    final response = await request.get('http://127.0.0.1:8000/get-souvenirs/?place_name=$placeName');
+    final response = await request
+        .get('http://127.0.0.1:8000/get-souvenirs/?place_name=$placeName');
     print(response); // Check if souvenirs are fetched correctly
     setState(() {
-      _souvenirs = response['souvenirs'] ?? []; // Access the 'souvenirs' key from response
+      _souvenirs = response['souvenirs'] ??
+          []; // Access the 'souvenirs' key from response
       _souvenirId = null; // Reset souvenir selection
     });
   }
@@ -143,7 +145,8 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                   },
                 ),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Select Souvenir'),
+                  decoration:
+                      const InputDecoration(labelText: 'Select Souvenir'),
                   value: _souvenirId,
                   items: _souvenirs.map((souvenir) {
                     return DropdownMenuItem<String>(
@@ -161,7 +164,9 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_imageBytes == null ? 'No image selected' : 'Image selected'),
+                    Text(_imageBytes == null
+                        ? 'No image selected'
+                        : 'Image selected'),
                     TextButton(
                       onPressed: _pickImage,
                       child: const Text('Pick Image'),
@@ -173,7 +178,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                     if (_formKey.currentState!.validate()) {
                       try {
                         final request = context.read<CookieRequest>();
-                        
+
                         String? imageBase64;
                         if (_imageBytes != null) {
                           imageBase64 = base64Encode(_imageBytes!);
@@ -197,7 +202,8 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
 
                         if (response != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Journal entry created!")),
+                            const SnackBar(
+                                content: Text("Journal entry created!")),
                           );
                           Navigator.pop(context);
                         } else {
