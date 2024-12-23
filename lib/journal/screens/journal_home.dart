@@ -29,7 +29,7 @@ class _JournalHomeState extends State<JournalHome> {
 
   Future<void> _fetchJournals() async {
     final request = context.read<CookieRequest>();
-    final response = await request.get('https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id');
+    final response = await request.get('https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/get-journals/');
     setState(() {
       _journals = journalEntryFromJson(jsonEncode(response));
     });
@@ -41,7 +41,7 @@ class _JournalHomeState extends State<JournalHome> {
       final request = context.read<CustomCookieRequest>();
 
       final response = await request.post(
-        "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",
+        "https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/like-journal-flutter/$journalId/",
         {},  // Empty map karena data dikirim via URL
       );
 
@@ -123,7 +123,7 @@ class _JournalHomeState extends State<JournalHome> {
   
     // Construct full URL with media path
     try {
-      return 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
+      return 'https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/$cleanPath';
     } catch (e) {
       print('Error constructing image URL: $e');
       return ''; // Or return default image URL

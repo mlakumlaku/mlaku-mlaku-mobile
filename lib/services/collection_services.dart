@@ -7,7 +7,7 @@ import 'dart:convert';
 
 
 class CollectionService {
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = "https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id";
 
   Future<List<Collection>> fetchCollections(CookieRequest request) async {
     final response = await request.get('$baseUrl/placeCollection/json/');
@@ -65,7 +65,7 @@ Future<void> deleteCollection(CookieRequest request, int collectionId) async {
 }
 
 Future<String> getCsrfToken() async {
-  final response = await http.get(Uri.parse('http://localhost:8000/placeCollection/get-csrf-token/'));
+  final response = await http.get(Uri.parse('https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/placeCollection/get-csrf-token/'));
   if (response.statusCode == 200) {
     final responseData = jsonDecode(response.body);
     return responseData['csrfToken'];

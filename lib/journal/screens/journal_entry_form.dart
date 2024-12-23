@@ -72,7 +72,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
   Future<List<dynamic>> _fetchPlaces() async {
     try {
       final request = context.read<CookieRequest>();
-      final response = await request.get("https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id");
+      final response = await request.get("https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/get-places/");
       print('Raw response: $response');
       
       if (response != null) {
@@ -89,7 +89,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
 
   Future<void> _fetchSouvenirs(String placeName) async {
     final request = context.read<CookieRequest>();
-    final response = await request.get('https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id');
+    final response = await request.get('https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/get-souvenirs/?place_name=$placeName');
     print(response); // Check if souvenirs are fetched correctly
     setState(() {
       _souvenirs = response['souvenirs'] ?? []; // Access the 'souvenirs' key from response
@@ -115,7 +115,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    return 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
+    return 'https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id$imagePath';
   }
 
   Widget _buildImagePreview() {
@@ -159,7 +159,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
       });
 
       final response = await request.postJson(
-        "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",  // Endpoint untuk update
+        "https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/edit-journal-flutter/${widget.journalToEdit!.pk}/",  // Endpoint untuk update
         requestData,
       );
 
@@ -288,7 +288,7 @@ class _JournalEntryFormPageState extends State<JournalEntryFormPage> {
                           });
 
                           final response = await request.postJson(
-                            "https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id",
+                            "https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/create-journal-flutter/",
                             requestData,
                           );
 

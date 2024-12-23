@@ -315,7 +315,7 @@ import '../models/place.dart';
 
 class PlaceService {
   final CookieRequest request;
-  static const String baseUrl = 'http://127.0.0.1:8000/places';
+  static const String baseUrl = 'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id';
 
   PlaceService(this.request);
 

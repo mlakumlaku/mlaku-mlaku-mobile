@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:mlaku_mlaku/models/itinerary_model.dart';
 
 class ApiService {
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  final String baseUrl = "https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/api/";
 
   Future<List<Itinerary>> fetchItineraries() async {
     final response = await http.get(Uri.parse("${baseUrl}itineraries/"));

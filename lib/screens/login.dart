@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Access the request as CustomCookieRequest
                       final request = context.read<CustomCookieRequest>();
 
-                      final response = await request.login("https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id", {
+                      final response = await request.login("https://nur-khoirunnisa-mlakumlaku2.pbp.cs.ui.ac.id/auth/login/", {
                           'username': username,
                           'password': password,
                       });

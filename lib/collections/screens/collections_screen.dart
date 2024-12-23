@@ -193,7 +193,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                               image: DecorationImage(
                                 image: NetworkImage(
                                   collection.getCollectionImageUrl() ??
-                                      'https://malika-atha31-mlakumlaku.pbp.cs.ui.ac.id',
+                                       'https://via.placeholder.com/150',
                                 ),
                                 fit: BoxFit.cover,
                               ),
